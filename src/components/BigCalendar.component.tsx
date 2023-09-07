@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
@@ -16,14 +16,22 @@ const [events, setEvents] = useState<any>([
   },
 ]);
 
+const dropdownOptions = ['KLASA A', 'KLASA B', 'KLASA C', 'KLASA D', 'KLASA E'];
+const [selectedItem, setSelectedItem] = useState(dropdownOptions[0]);
 const [newEvent, setNewEvent] = useState<any>({
-  title: '',
+  title: selectedItem,
   description: '',
   start: new Date(),
   end: new Date(),
 });
 
+useEffect(() => {
+  setNewEvent({ ...newEvent, title: selectedItem });
+}, [selectedItem]);
+
+
 const [editingEvent, setEditingEvent] = useState(null);
+
 console.log(editingEvent, "editingEvent")
 
 const handleEventClick = (event) => {
@@ -75,6 +83,7 @@ const handleInputChange = (e: any) => {
       <div className="custom-toolbar">
         <button onClick={goToPreviousWeek}>Previous Week</button>
         <button onClick={goToNextWeek}>Next Week</button>
+        <Dropdown selectedItem={selectedItem} onItemSelect={handleItemSelect} options={dropdownOptions} />
       </div>
     );
   };
@@ -184,9 +193,30 @@ function CustomEvent({ event }) {
 
 
 
+const handleItemSelect = (item) => {
+  setSelectedItem(item);
+};
+
+function Dropdown({ selectedItem, onItemSelect, options }) {
+  return (
+    <select value={selectedItem} onChange={(e) => onItemSelect(e.target.value)}>
+      {options.map((option) => (
+        <option key={option} value={option}>
+          {option}
+        </option>
+      ))}
+    </select>
+  );
+}
+
+
+
+
+
 
   return (
     <div>
+
       <Calendar
         localizer={localizer}
         events={events}
