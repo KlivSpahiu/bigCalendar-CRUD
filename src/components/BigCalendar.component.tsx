@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import 'react-big-calendar/lib/css/react-big-calendar.css';
+import { isTemplateSpan } from 'typescript';
 
 const localizer = momentLocalizer(moment);
 
@@ -9,7 +10,7 @@ const MyCalendar = () => {
 const [events, setEvents] = useState<any>([
   {
     id: 1,
-    title: 'Sample Event',
+    title: 'KLASA C',
     start: new Date(),
     end: new Date(),
     description: 'This is a sample event',
@@ -32,7 +33,7 @@ useEffect(() => {
 
 const [editingEvent, setEditingEvent] = useState(null);
 
-console.log(editingEvent, "editingEvent")
+
 
 const handleEventClick = (event) => {
   setEditingEvent({ ...event }); 
@@ -192,9 +193,13 @@ function CustomEvent({ event }) {
 
 
 
-
+const [filteredEvents, setFilteredEvents] = useState([]);
 const handleItemSelect = (item) => {
   setSelectedItem(item);
+   const filtered = events.filter((event) => event.title === item);
+  setFilteredEvents(filtered);
+ 
+  
 };
 
 function Dropdown({ selectedItem, onItemSelect, options }) {
@@ -219,7 +224,7 @@ function Dropdown({ selectedItem, onItemSelect, options }) {
 
       <Calendar
         localizer={localizer}
-        events={events}
+        events={filteredEvents}
         startAccessor="start"
         endAccessor="end"
         date={currentDate}
