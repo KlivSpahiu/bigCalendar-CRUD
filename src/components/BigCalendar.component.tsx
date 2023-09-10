@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
-import { Form, Input, DatePicker, Button, Modal, TimePicker } from "antd";
+import {
+  Form,
+  Input,
+  DatePicker,
+  Button,
+  Modal,
+  TimePicker,
+  Select,
+} from "antd";
 import dayjs from "dayjs";
 import Moment from "moment"; // Import Moment from the moment library
 import "react-big-calendar/lib/css/react-big-calendar.css";
+import "../components/BigCalendar.css";
 
 const { TextArea } = Input;
+const { Option } = Select;
 
 const localizer = momentLocalizer(Moment);
 
@@ -105,7 +115,7 @@ const MyCalendar: React.FC = () => {
           <button onClick={goToNextWeek} className="week-button">
             Next Week
           </button>
-          <Dropdown
+          <CustomDropdown
             selectedItem={selectedItem}
             onItemSelect={handleItemSelect}
             options={dropdownOptions}
@@ -226,17 +236,15 @@ const MyCalendar: React.FC = () => {
     setNewEvent({ ...newEvent, [name]: value });
   };
 
-  function Dropdown({ selectedItem, onItemSelect, options }) {
+  function CustomDropdown({ selectedItem, onItemSelect, options }) {
     return (
-      <select
-        value={selectedItem}
-        onChange={(e) => onItemSelect(e.target.value)}>
+      <Select value={selectedItem} onChange={onItemSelect}>
         {options.map((option) => (
-          <option key={option} value={option}>
+          <Option key={option} value={option}>
             {option}
-          </option>
+          </Option>
         ))}
-      </select>
+      </Select>
     );
   }
 
