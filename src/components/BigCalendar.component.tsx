@@ -164,13 +164,11 @@ const MyCalendar: React.FC = () => {
   const handleEditInputChange = (e) => {
     const { name, value } = e.target;
 
-    if (name === "start" || name === "end") {
-      // Parse the date and time input and set it as a Date object
-      setEditingEvent({ ...editingEvent, [name]: new Date(value) });
-    } else {
-      // Handle other input changes as before
-      setEditingEvent({ ...editingEvent, [name]: value });
-    }
+    // Assuming `editingEvent` is stored as state
+    setEditingEvent({
+      ...editingEvent,
+      [name]: value,
+    });
   };
 
   const handleEventUpdate = () => {
@@ -248,6 +246,25 @@ const MyCalendar: React.FC = () => {
     );
   }
 
+  const formatTime = (time) => {
+    return time ? dayjs(time, "HH:mm").format("HH:mm") : null;
+  };
+
+  const parseTime = (timeString) => {
+    try {
+      if (timeString) {
+        const parsedTime = dayjs(timeString, "HH:mm");
+        console.log("Input time:", timeString);
+        console.log("Parsed time:", parsedTime.format("HH:mm"));
+        return parsedTime;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error parsing time:", error);
+      return null;
+    }
+  };
+
   return (
     <div>
       <Calendar
@@ -273,45 +290,60 @@ const MyCalendar: React.FC = () => {
       {editingEvent && (
         <div>
           <h2>Edit Event</h2>
-          <form>
-            <label>Title:</label>
-            <input
-              type="text"
-              name="title"
-              value={editingEvent.title || ""}
-              onChange={handleEditInputChange}
-            />
-            <br />
-            <label>Description:</label>
-            <textarea
-              name="description"
-              value={editingEvent.description}
-              onChange={handleEditInputChange}
-            />
-            <br />
-            <label>Start Time:</label>
-            <input
-              type="datetime-local"
-              name="start"
-              value={dayjs(editingEvent.start).format("YYYY-MM-DDTHH:mm")}
-              onChange={handleEditInputChange}
-            />
-            <br />
-            <label>End Time:</label>
-            <input
-              type="datetime-local"
-              name="end"
-              value={dayjs(editingEvent.end).format("YYYY-MM-DDTHH:mm")}
-              onChange={handleEditInputChange}
-            />
-            <br />
-            <button type="button" onClick={handleEventUpdate}>
-              Update Event
-            </button>
-            <button type="button" onClick={handleEventDelete}>
-              Delete event
-            </button>
-          </form>
+          <Form>
+            <Form.Item label="Title">
+              <Input
+                name="title"
+                value={editingEvent.title || ""}
+                onChange={handleEditInputChange}
+              />
+            </Form.Item>
+            <Form.Item label="Description">
+              <TextArea
+                name="description"
+                value={editingEvent.description}
+                onChange={handleEditInputChange}
+              />
+            </Form.Item>
+            <Form.Item label="Start Time">
+              <TimePicker
+                format="HH:mm"
+                name="start"
+                value={parseTime(editingEvent.start)}
+                onChange={(time, timeString) =>
+                  handleEditInputChange({
+                    target: {
+                      name: "start",
+                      value: timeString,
+                    },
+                  })
+                }
+              />
+            </Form.Item>
+            <Form.Item label="End Time">
+              <TimePicker
+                format="HH:mm"
+                name="end"
+                value={parseTime(editingEvent.end)}
+                onChange={(time, timeString) =>
+                  handleEditInputChange({
+                    target: {
+                      name: "end",
+                      value: timeString,
+                    },
+                  })
+                }
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" onClick={handleEventUpdate}>
+                Update Event
+              </Button>
+              <Button type="primary" onClick={handleEventDelete}>
+                Delete Event
+              </Button>
+            </Form.Item>
+          </Form>
         </div>
       )}
       <Modal
