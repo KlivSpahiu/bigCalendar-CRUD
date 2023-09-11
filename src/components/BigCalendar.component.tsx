@@ -22,16 +22,7 @@ const { Option } = Select;
 const localizer = momentLocalizer(Moment);
 
 const MyCalendar: React.FC = () => {
-  const [events, setEvents] = useState<any>([
-    {
-      id: 2,
-      title: "KLASA A",
-      start: new Date(),
-      end: new Date(),
-      description: "This is a sample event",
-      lenda: "Lenda 1 "
-    },
-  ]);
+  const [events, setEvents] = useState<any>([]);
 
   const klasaDropdownOptions = [
     "KLASA A",
@@ -91,14 +82,15 @@ const MyCalendar: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState(klasaDropdownOptions[0]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
-  const [selectedSubject, setSelectedSubject] = useState(lendaDropdownOptions[0])
+  const [selectedSubject, setSelectedSubject] = useState<any>("")
 
   const [newEvent, setNewEvent] = useState<any>({
     title: selectedItem,
     description: "",
     start: new Date(),
     end: new Date(),
-    lenda: selectedSubject.lenda
+    lenda: selectedSubject.lenda as string,
+    professor: ""
   });
 
 
@@ -112,7 +104,7 @@ const MyCalendar: React.FC = () => {
   };
 
   useEffect(() => {
-    setNewEvent({ ...newEvent, title: selectedItem });
+    setNewEvent({ ...newEvent, title: selectedItem});
   }, [selectedItem]);
 
   const [showEditModal ,setShowEditModal] = useState(false)
@@ -122,7 +114,7 @@ const MyCalendar: React.FC = () => {
     setShowEditModal(true)
   };
 
-  console.log(selectedSubject, "selected subject")
+
 
   const handleInputChange = (name: string, value: string) => {
     if (name === "date") {
@@ -185,6 +177,7 @@ const MyCalendar: React.FC = () => {
     );
   };
 
+
   const handleEventCreation = () => {
     // Create a new event
     const newEventToAdd = {
@@ -192,8 +185,12 @@ const MyCalendar: React.FC = () => {
       description: newEvent.description,
       start: newEvent.start,
       end: newEvent.end,
-      lenda: newEvent.lenda
+      lenda: selectedSubject.lenda,
+      professor: newEvent.name
     };
+
+    console.log(newEventToAdd, "new event to add")
+    console.log(newEvent, "newEvent")
 
     // Update the events state with the new event
     setEvents((prevEvents) => [...prevEvents, newEventToAdd]);
@@ -204,6 +201,8 @@ const MyCalendar: React.FC = () => {
       description: "",
       start: new Date(),
       end: new Date(),
+      lenda: selectedSubject.lenda,
+      professor: ""
     });
 
     // Update the filteredEvents state based on the selectedItem
@@ -260,13 +259,20 @@ form.resetFields();
 
   function CustomEvent({ event }) {
     return (
-      <div style={{eventStyle} as any}>
+      <div >
         <strong>{event.title}</strong>
-        <p>{event.description}</p>
+        <p>{`Pedagogu i lendes: ${event.professor}`}</p>
         <p>{`Lenda: ${event.lenda}`}</p>
       </div>
     );
+    
   }
+
+const handleSelectChange = (value) => {
+
+  const selectedOption = lendaDropdownOptions.find((option) => option.lenda === value);
+  setSelectedSubject(selectedOption || null);
+};
 
   function LendaDropDown() {
     return (
@@ -275,18 +281,22 @@ form.resetFields();
         label="Select an option"
         rules={[{ required: true, message: 'Please select an option' }]}
       >
-        <Select placeholder="Select an option" onChange={handleSubjectSelect}>
-          {lendaDropdownOptions.map((option: any, index) => (
-            <Option key={index} value={option.lenda}>
-              {option.lenda}
-            </Option>
-          ))}
-        </Select>
+<Select
+  placeholder="Select an option"
+  value={selectedSubject ? selectedSubject.lenda : undefined}
+  onChange={(value) => handleSelectChange(value)}
+>
+  {lendaDropdownOptions.map((option: any, index) => (
+    <Option key={index} value={option.lenda}>
+      {option.lenda}
+    </Option>
+  ))}
+</Select>
       </Form.Item>
     )
   }
 
-  console.log(events, "events");
+
 
   const handleItemSelect = (item) => {
     setSelectedItem(item);
@@ -294,10 +304,6 @@ form.resetFields();
     setFilteredEvents(filtered);
   };
 
-  const handleSubjectSelect = (item) => {
-    setSelectedSubject(item)
-    console.log(selectedSubject, "selected subject")
-  }
 
   const handleStartTimeChange = (time, timeString) => {
     handleInputChange("start", time);
@@ -334,17 +340,7 @@ form.resetFields();
   };
 
 
-    const eventStyle = () => {
-    const style = {
-      backgroundColor: selectedSubject.color || 'green', // Use the state variable or a default color
-    };
 
-    return {
-      style,
-    };
-  };
-
-  // Function to change the event color in the state
 
   return (
     <div>
@@ -366,10 +362,7 @@ form.resetFields();
           })
         }
         onSelectEvent={handleEventClick}
-        
-        
       />
-
       <Modal title="Modifiko lenden" visible={showEditModal} onCancel={() => setShowEditModal(false)}>
           {editingEvent && <Form>
             <Form.Item label="Title">
@@ -424,9 +417,9 @@ form.resetFields();
                 Delete Event
               </Button>
             </Form.Item>
-          </Form> }</Modal>
+          </Form>}
+          </Modal>
           
-      
       <Modal
         title="Shto lende ne orar"
         visible={isModalOpen} // Use "visible" instead of "open"
@@ -445,13 +438,18 @@ form.resetFields();
             defaultValue={newEvent.title}
           />
         </Form.Item>
-        <Form.Item label="Description" name="description">
-          <TextArea
-            name="description"
-            value={newEvent.description}
-            onChange={(e) => handleInputChange(e.target.name, e.target.value)}
-          />
-        </Form.Item>
+<Form.Item
+      label="Name"
+      name="name"
+      rules={[{ required: true, message: "Please enter the name" }]}
+    >
+      <Input
+        type="text"
+        name="name"
+        value={newEvent.professor}
+        onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+      />
+    </Form.Item>
         <Form.Item
           label="Start Time"
           name="start"
@@ -463,7 +461,7 @@ form.resetFields();
             onChange={handleStartTimeChange}
           />
         </Form.Item>
-        <LendaDropDown/>
+        
         <Form.Item
           label="End Time"
           name="end"
@@ -474,7 +472,7 @@ form.resetFields();
             value={dayjs(newEvent.end)}
             onChange={handleEndTimeChange}
           />
-        </Form.Item>
+        </Form.Item><LendaDropDown/>
         <Form.Item
           label="Date"
           name="date"
