@@ -37,42 +37,42 @@ const MyCalendar: React.FC = () => {
   const lendaDropdownOptions = [
     {
       lenda: "E drejta kushtetuese dhe të drejtat e njeriut",
-      color: "#FFFADD",
+      color: "#C63D2F",
       viti: 1
     },
      {
       lenda: "E drejta administrative dhe e drejta e punës ",
-      color: "#8ECDDD",
+      color: "#176B87",
       viti: 2
     },
      {
       lenda: "E drejta penale dhe procedurë penale ",
-      color: "#E4F1FF",
+      color: "#4D2DB7",
       viti: 1
     },
      {
       lenda: " E drejta civile dhe procedurë civile",
-      color: "#EBEF95",
+      color: "#183D3D",
       viti: 1
     },
      {
       lenda: "E drejta familjare  dhe e drejta tregtare",
-      color: "#FFBB5C",
+      color: "#FFC436",
       viti: 2
     },
      {
       lenda: "E drejta e BE-së  dhe e drejta ndërkombëtare publike",
-      color: "#E4E4D0",
+      color: "#FF6969",
       viti: 2
     },
      {
       lenda: "Gjuha shqipe",
-      color: "#D8B4F8",
+      color: "#5C5470",
       viti: 1
     },
          {
       lenda: "Etika dhe sjellja qytetare",
-      color: "#F4EEEE",
+      color: "#974EC3",
       viti: 2
     },
 
@@ -90,7 +90,8 @@ const MyCalendar: React.FC = () => {
     start: new Date(),
     end: new Date(),
     lenda: selectedSubject.lenda as string,
-    professor: ""
+    professor: "",
+    color: selectedSubject.color
   });
 
 
@@ -186,7 +187,8 @@ const MyCalendar: React.FC = () => {
       start: newEvent.start,
       end: newEvent.end,
       lenda: selectedSubject.lenda,
-      professor: newEvent.name
+      professor: newEvent.name,
+      color: selectedSubject.color
     };
 
     console.log(newEventToAdd, "new event to add")
@@ -202,7 +204,8 @@ const MyCalendar: React.FC = () => {
       start: new Date(),
       end: new Date(),
       lenda: selectedSubject.lenda,
-      professor: ""
+      professor: "",
+      color: ""
     });
 
     // Update the filteredEvents state based on the selectedItem
@@ -341,6 +344,26 @@ const handleSelectChange = (value) => {
 
 
 
+   const eventStyleGetter = (event) => {
+ 
+    const backgroundColor = event.color
+
+    console.log(event, "event")
+
+    const style = {
+      backgroundColor,
+      borderRadius: "0",
+      opacity: 0.8,
+      color: "white",
+      border: "1px solid #ccc",
+      display: "block",
+    };
+
+    return {
+      style,
+    };
+  };
+
 
   return (
     <div>
@@ -361,6 +384,7 @@ const handleSelectChange = (value) => {
             end: slotInfo.end,
           })
         }
+        eventPropGetter={eventStyleGetter}
         onSelectEvent={handleEventClick}
       />
       <Modal title="Modifiko lenden" visible={showEditModal} onCancel={() => setShowEditModal(false)}>
