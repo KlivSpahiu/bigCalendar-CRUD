@@ -10,12 +10,14 @@ import {
   Select,
 } from "antd";
 import dayjs from "dayjs";
-import Moment from "moment"; // Import Moment from the moment library
+import Moment from "moment";
+import { useForm } from "antd/lib/form/Form"
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../components/BigCalendar.css";
 
 const { TextArea } = Input;
 const { Option } = Select;
+
 
 const localizer = momentLocalizer(Moment);
 
@@ -27,34 +29,82 @@ const MyCalendar: React.FC = () => {
       start: new Date(),
       end: new Date(),
       description: "This is a sample event",
+      lenda: "Lenda 1 "
     },
   ]);
 
-  const dropdownOptions = [
+  const klasaDropdownOptions = [
     "KLASA A",
     "KLASA B",
     "KLASA C",
     "KLASA D",
     "KLASA E",
   ];
+
+  const [form] = useForm();
+
+  const lendaDropdownOptions = [
+    {
+      lenda: "E drejta kushtetuese dhe të drejtat e njeriut",
+      color: "#FFFADD",
+      viti: 1
+    },
+     {
+      lenda: "E drejta administrative dhe e drejta e punës ",
+      color: "#8ECDDD",
+      viti: 2
+    },
+     {
+      lenda: "E drejta penale dhe procedurë penale ",
+      color: "#E4F1FF",
+      viti: 1
+    },
+     {
+      lenda: " E drejta civile dhe procedurë civile",
+      color: "#EBEF95",
+      viti: 1
+    },
+     {
+      lenda: "E drejta familjare  dhe e drejta tregtare",
+      color: "#FFBB5C",
+      viti: 2
+    },
+     {
+      lenda: "E drejta e BE-së  dhe e drejta ndërkombëtare publike",
+      color: "#E4E4D0",
+      viti: 2
+    },
+     {
+      lenda: "Gjuha shqipe",
+      color: "#D8B4F8",
+      viti: 1
+    },
+         {
+      lenda: "Etika dhe sjellja qytetare",
+      color: "#F4EEEE",
+      viti: 2
+    },
+
+  ]
+
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(dropdownOptions[0]);
+  const [selectedItem, setSelectedItem] = useState(klasaDropdownOptions[0]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [selectedSubject, setSelectedSubject] = useState(lendaDropdownOptions[0])
 
   const [newEvent, setNewEvent] = useState<any>({
     title: selectedItem,
     description: "",
     start: new Date(),
     end: new Date(),
+    lenda: selectedSubject.lenda
   });
+
+
 
   const showModal = () => {
     setIsModalOpen(true);
-  };
-
-  const handleOk = () => {
-    setIsModalOpen(false);
   };
 
   const handleCancel = () => {
@@ -65,17 +115,21 @@ const MyCalendar: React.FC = () => {
     setNewEvent({ ...newEvent, title: selectedItem });
   }, [selectedItem]);
 
+  const [showEditModal ,setShowEditModal] = useState(false)
+
   const handleEventClick = (event) => {
     setEditingEvent({ ...event });
+    setShowEditModal(true)
   };
+
+  console.log(selectedSubject, "selected subject")
 
   const handleInputChange = (name: string, value: string) => {
     if (name === "date") {
-      // Assuming 'value' is in 'YYYY-MM-DD' format
+   
       const newStartDate = dayjs(value)
         .hour(dayjs(newEvent.start).hour())
         .minute(dayjs(newEvent.start).minute());
-      console.log(value, "start");
       const newEndDate = dayjs(value)
         .hour(dayjs(newEvent.end).hour())
         .minute(dayjs(newEvent.end).minute());
@@ -86,7 +140,7 @@ const MyCalendar: React.FC = () => {
         end: newEndDate.toDate(),
       });
     } else if (name === "start" || name === "end") {
-      // Assuming 'value' is in 'HH:mm' format
+   
       setNewEvent({ ...newEvent, [name]: value });
     } else {
       setNewEvent({ ...newEvent, [name]: value });
@@ -118,7 +172,7 @@ const MyCalendar: React.FC = () => {
           <CustomDropdown
             selectedItem={selectedItem}
             onItemSelect={handleItemSelect}
-            options={dropdownOptions}
+            options={klasaDropdownOptions}
           />
         </div>
         <Button
@@ -138,6 +192,7 @@ const MyCalendar: React.FC = () => {
       description: newEvent.description,
       start: newEvent.start,
       end: newEvent.end,
+      lenda: newEvent.lenda
     };
 
     // Update the events state with the new event
@@ -157,13 +212,12 @@ const MyCalendar: React.FC = () => {
       updatedFilteredEvents.push(newEventToAdd);
     }
     setFilteredEvents(updatedFilteredEvents);
-
+form.resetFields();
     setIsModalOpen(false);
   };
 
   const handleEditInputChange = (e) => {
     const { name, value } = e.target;
-
     // Assuming `editingEvent` is stored as state
     setEditingEvent({
       ...editingEvent,
@@ -199,7 +253,6 @@ const MyCalendar: React.FC = () => {
     const confirmDelete = window.confirm(
       `Are you sure you want to delete the event "${event.title}"?`
     );
-
     if (confirmDelete) {
       deleteEvent(event.id);
     }
@@ -207,11 +260,30 @@ const MyCalendar: React.FC = () => {
 
   function CustomEvent({ event }) {
     return (
-      <div>
+      <div style={{eventStyle} as any}>
         <strong>{event.title}</strong>
         <p>{event.description}</p>
+        <p>{`Lenda: ${event.lenda}`}</p>
       </div>
     );
+  }
+
+  function LendaDropDown() {
+    return (
+      <Form.Item
+        name="selectedOption"
+        label="Select an option"
+        rules={[{ required: true, message: 'Please select an option' }]}
+      >
+        <Select placeholder="Select an option" onChange={handleSubjectSelect}>
+          {lendaDropdownOptions.map((option: any, index) => (
+            <Option key={index} value={option.lenda}>
+              {option.lenda}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
+    )
   }
 
   console.log(events, "events");
@@ -222,6 +294,11 @@ const MyCalendar: React.FC = () => {
     setFilteredEvents(filtered);
   };
 
+  const handleSubjectSelect = (item) => {
+    setSelectedSubject(item)
+    console.log(selectedSubject, "selected subject")
+  }
+
   const handleStartTimeChange = (time, timeString) => {
     handleInputChange("start", time);
   };
@@ -230,9 +307,6 @@ const MyCalendar: React.FC = () => {
     handleInputChange("end", time);
   };
 
-  const handleRegularInputChange = (name, value) => {
-    setNewEvent({ ...newEvent, [name]: value });
-  };
 
   function CustomDropdown({ selectedItem, onItemSelect, options }) {
     return (
@@ -246,16 +320,10 @@ const MyCalendar: React.FC = () => {
     );
   }
 
-  const formatTime = (time) => {
-    return time ? dayjs(time, "HH:mm").format("HH:mm") : null;
-  };
-
   const parseTime = (timeString) => {
     try {
       if (timeString) {
         const parsedTime = dayjs(timeString, "HH:mm");
-        console.log("Input time:", timeString);
-        console.log("Parsed time:", parsedTime.format("HH:mm"));
         return parsedTime;
       }
       return null;
@@ -264,6 +332,19 @@ const MyCalendar: React.FC = () => {
       return null;
     }
   };
+
+
+    const eventStyle = () => {
+    const style = {
+      backgroundColor: selectedSubject.color || 'green', // Use the state variable or a default color
+    };
+
+    return {
+      style,
+    };
+  };
+
+  // Function to change the event color in the state
 
   return (
     <div>
@@ -285,12 +366,12 @@ const MyCalendar: React.FC = () => {
           })
         }
         onSelectEvent={handleEventClick}
+        
+        
       />
 
-      {editingEvent && (
-        <div>
-          <h2>Edit Event</h2>
-          <Form>
+      <Modal title="Modifiko lenden" visible={showEditModal} onCancel={() => setShowEditModal(false)}>
+          {editingEvent && <Form>
             <Form.Item label="Title">
               <Input
                 name="title"
@@ -343,14 +424,15 @@ const MyCalendar: React.FC = () => {
                 Delete Event
               </Button>
             </Form.Item>
-          </Form>
-        </div>
-      )}
+          </Form> }</Modal>
+          
+      
       <Modal
         title="Shto lende ne orar"
         visible={isModalOpen} // Use "visible" instead of "open"
         onOk={handleEventCreation}
         onCancel={handleCancel}>
+          <Form form={form}>
         <Form.Item
           label="Title"
           name="title"
@@ -381,6 +463,7 @@ const MyCalendar: React.FC = () => {
             onChange={handleStartTimeChange}
           />
         </Form.Item>
+        <LendaDropDown/>
         <Form.Item
           label="End Time"
           name="end"
@@ -405,6 +488,7 @@ const MyCalendar: React.FC = () => {
             }
           />
         </Form.Item>
+        </Form>
       </Modal>
     </div>
   );
