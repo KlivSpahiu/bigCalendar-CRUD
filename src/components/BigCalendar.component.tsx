@@ -34,6 +34,12 @@ const MyCalendar: React.FC = () => {
 
   const [form] = useForm();
 
+  const workingHoursStart = new Date();
+  workingHoursStart.setHours(8, 0, 0, 0); // 9:00 AM
+
+  const workingHoursEnd = new Date();
+  workingHoursEnd.setHours(21, 0, 0, 0);
+
   const lendaDropdownOptions = [
     {
       lenda: "E drejta kushtetuese dhe të drejtat e njeriut",
@@ -83,6 +89,7 @@ const MyCalendar: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [selectedSubject, setSelectedSubject] = useState<any>("")
+  
 
   const [newEvent, setNewEvent] = useState<any>({
     title: selectedItem,
@@ -364,10 +371,41 @@ const handleSelectChange = (value) => {
     };
   };
 
+    const calendarStyle = {
+    height: "1200px", // Adjust the height as needed
+  };
+
+// const eventHeight = document.querySelector(".rbc-event");
+
+// useEffect(() => {
+//   if (eventHeight) {
+//   eventHeight.addEventListener("mouseover", () => {
+//     eventHeight.classList.add("event-full-height"); // Remove the dot before the class name
+//     console.log("entered");
+//   });
+//  eventHeight.addEventListener("mouseleave", () => {
+//     eventHeight.classList.remove("event-full-height");
+//     console.log("leave");
+//   })
+ 
+// }
+// })
+
+// Function to add a class on mouse enter
+
+
+
+
+
+
+ 
+
 
   return (
     <div>
-      <Calendar
+      <div
+       style={calendarStyle}>   
+       <Calendar
         localizer={localizer}
         events={filteredEvents}
         startAccessor="start"
@@ -386,7 +424,11 @@ const handleSelectChange = (value) => {
         }
         eventPropGetter={eventStyleGetter}
         onSelectEvent={handleEventClick}
-      />
+           min={workingHoursStart}
+        max={workingHoursEnd} 
+        
+      /></div>
+   
       <Modal title="Modifiko lenden" visible={showEditModal} onCancel={() => setShowEditModal(false)}>
           {editingEvent && <Form>
             <Form.Item label="Title">
