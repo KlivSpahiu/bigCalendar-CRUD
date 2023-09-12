@@ -83,7 +83,9 @@ const MyCalendar: React.FC = () => {
   ];
 
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(klasaDropdownOptions[0]);
+  const [selectedItem, setSelectedItem] = useState<any>(
+    klasaDropdownOptions[0]
+  );
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [selectedSubject, setSelectedSubject] = useState<any>("");
@@ -466,18 +468,18 @@ const MyCalendar: React.FC = () => {
         onOk={handleEventCreation}
         onCancel={handleCancel}>
         <Form form={form}>
-          <Form.Item
+          {/* <Form.Item
             label="Title"
             name="title"
             rules={[{ required: true, message: "Please enter the title" }]}>
             <Input
               type="text"
               name="title"
-              value={newEvent.title}
+              value={selectedItem.title}
               onChange={(e) => handleInputChange(e.target.name, e.target.value)}
-              defaultValue={newEvent.title}
+              defaultValue={selectedItem.title as string}
             />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item
             label="Name"
             name="name"
