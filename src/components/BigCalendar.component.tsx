@@ -112,15 +112,33 @@ const MyCalendar: React.FC = () => {
     setNewEvent({ ...newEvent, title: selectedItem });
   }, [selectedItem]);
 
-  console.log(newEvent, "selectedItem");
+
 
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const handleEventClick = (event) => {
-    setEditingEvent({ ...event });
+  const handleEventClick = (eventInfos) => {
+    console.log(editingEvent, "editingEvent")
+    setEditingEvent({ ...eventInfos });
     setShowEditModal(true);
+
   };
 
+  const initialEditValues = () => {
+    const initialValues = []
+
+    for (const key in editingEvent) {
+      initialValues.push({
+        name: key,
+        value: editingEvent[key]
+      })
+  }
+
+  return initialValues
+  }
+
+  console.log(initialEditValues(),'initial')
+
+ 
   const handleInputChange = (name: string, value: string) => {
     if (name === "date") {
       const newStartDate = dayjs(value)
@@ -232,31 +250,33 @@ const MyCalendar: React.FC = () => {
     );
 
     if (eventIndex !== -1) {
-      // Update the event in the events array
       const updatedEvents = [...events];
       updatedEvents[eventIndex] = editingEvent;
 
       setEvents(updatedEvents);
-      setEditingEvent(null); // Clear the editing state
+      setEditingEvent(null);
     } else {
-      // Handle the case where the event with the given ID is not found
       console.error("Event not found for editing.");
     }
   };
 
-  const deleteEvent = (eventId) => {
-    const updatedEvents = events.filter((event) => event.id !== eventId);
-    setEvents(updatedEvents);
-  };
+  const handleEventDelete = () => {
+    if (editingEvent) {
+      const eventsArray = filteredEvents.filter(
+        (event) => event.lenda !== editingEvent.lenda
+      );
+      setFilteredEvents(eventsArray);
+      setShowEditModal(false)
 
-  const handleEventDelete = (event) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete the event "${event.title}"?`
-    );
-    if (confirmDelete) {
-      deleteEvent(event.id);
+      console.log(eventsArray, "updatedEvents")
+
     }
   };
+
+  console.log(filteredEvents, "filteredEvents")
+
+
+
 
   const getParentElement = (e) => {
     const element = e.currentTarget;
@@ -373,6 +393,30 @@ const MyCalendar: React.FC = () => {
     height: "1200px", // Adjust the height as needed
   };
 
+
+  console.log("form.getFieldsValue():", form.getFieldsValue())
+
+  const editFormFooter = () => {
+    return (
+                  <Form.Item>
+              <Button type="default" onClick={handleEventUpdate}>
+                Update Event
+              </Button>
+              <Button type="primary" onClick={handleEventDelete}>
+                Delete Event
+              </Button>
+            </Form.Item>
+    )
+  }
+
+
+  const CustomModalHeader = () => {
+    return (
+      <div >
+        <h2 style={{ margin: 0, color: '#003666' }}>Shto lende ne orar</h2>
+      </div>
+    );
+  };
   return (
     <div>
       <div style={calendarStyle}>
@@ -403,28 +447,35 @@ const MyCalendar: React.FC = () => {
       <Modal
         title="Modifiko lenden"
         visible={showEditModal}
-        onCancel={() => setShowEditModal(false)}>
-        {editingEvent && (
-          <Form>
-            <Form.Item label="Title">
+        onCancel={() => setShowEditModal(false)}
+        footer={editFormFooter}
+        >
+      
+        
+          <Form form={form} initialValues={editingEvent} >
+            <Form.Item label="Title" name="title">
               <Input
-                name="title"
-                value={editingEvent.title || ""}
+                
+                // value={editingEvent.title}
                 onChange={handleEditInputChange}
               />
             </Form.Item>
-            <Form.Item label="Description">
-              <TextArea
-                name="description"
-                value={editingEvent.description}
-                onChange={handleEditInputChange}
-              />
-            </Form.Item>
+            <Form.Item
+            label="Name"
+            name="professor"
+            rules={[{ required: true, message: "Please enter the name" }]}>
+            <Input
+              type="text"
+              
+              onChange={(e) => handleEditInputChange( e.target.value)}
+            />
+          </Form.Item>
+{/*             
             <Form.Item label="Start Time">
               <TimePicker
                 format="HH:mm"
                 name="start"
-                value={parseTime(editingEvent.start)}
+
                 onChange={(time, timeString) =>
                   handleEditInputChange({
                     target: {
@@ -439,7 +490,7 @@ const MyCalendar: React.FC = () => {
               <TimePicker
                 format="HH:mm"
                 name="end"
-                value={parseTime(editingEvent.end)}
+            
                 onChange={(time, timeString) =>
                   handleEditInputChange({
                     target: {
@@ -449,37 +500,20 @@ const MyCalendar: React.FC = () => {
                   })
                 }
               />
-            </Form.Item>
-            <Form.Item>
-              <Button type="primary" onClick={handleEventUpdate}>
-                Update Event
-              </Button>
-              <Button type="primary" onClick={handleEventDelete}>
-                Delete Event
-              </Button>
-            </Form.Item>
+            </Form.Item> */}
+
           </Form>
-        )}
+        
       </Modal>
 
       <Modal
-        title="Shto lende ne orar"
-        visible={isModalOpen} // Use "visible" instead of "open"
+        title={<CustomModalHeader />}
+        centered
+        visible={isModalOpen} 
         onOk={handleEventCreation}
         onCancel={handleCancel}>
         <Form form={form}>
-          {/* <Form.Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: "Please enter the title" }]}>
-            <Input
-              type="text"
-              name="title"
-              value={selectedItem.title}
-              onChange={(e) => handleInputChange(e.target.name, e.target.value)}
-              defaultValue={selectedItem.title as string}
-            />
-          </Form.Item> */}
+        <LendaDropDown />
           <Form.Item
             label="Name"
             name="name"
@@ -492,6 +526,20 @@ const MyCalendar: React.FC = () => {
             />
           </Form.Item>
           <Form.Item
+            label="Date"
+            name="date"
+            rules={[{ required: true, message: "Please select a date" }]}>
+            <DatePicker
+              format="YYYY-MM-DD"
+              name="date"
+              value={dayjs(newEvent.start)}
+              onChange={(date, dateString) =>
+                handleInputChange("date", dateString)
+              }
+            />
+          </Form.Item>
+          <div style={{display: "flex", justifyContent: "space-between"}}>
+            <Form.Item
             label="Start Time"
             name="start"
             rules={[
@@ -516,18 +564,20 @@ const MyCalendar: React.FC = () => {
               onChange={handleEndTimeChange}
             />
           </Form.Item>
-          <LendaDropDown />
-          <Form.Item
-            label="Date"
-            name="date"
-            rules={[{ required: true, message: "Please select a date" }]}>
-            <DatePicker
-              format="YYYY-MM-DD"
-              name="date"
-              value={dayjs(newEvent.start)}
-              onChange={(date, dateString) =>
-                handleInputChange("date", dateString)
-              }
+          </div>
+          
+          
+          
+                   <Form.Item
+            label="Title"
+            name="title"
+            rules={[{ required: true, message: "Please enter the title" }]}>
+            <TextArea
+              
+              name="title"
+              value={selectedItem.title}
+              onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+              defaultValue={selectedItem.title as string}
             />
           </Form.Item>
         </Form>
