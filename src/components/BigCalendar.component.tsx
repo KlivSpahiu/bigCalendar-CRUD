@@ -11,13 +11,12 @@ import {
 } from "antd";
 import dayjs from "dayjs";
 import Moment from "moment";
-import { useForm } from "antd/lib/form/Form"
+import { useForm } from "antd/lib/form/Form";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../components/BigCalendar.css";
 
 const { TextArea } = Input;
 const { Option } = Select;
-
 
 const localizer = momentLocalizer(Moment);
 
@@ -44,64 +43,60 @@ const MyCalendar: React.FC = () => {
     {
       lenda: "E drejta kushtetuese dhe të drejtat e njeriut",
       color: "#C63D2F",
-      viti: 1
+      viti: 1,
     },
-     {
+    {
       lenda: "E drejta administrative dhe e drejta e punës ",
       color: "#176B87",
-      viti: 2
+      viti: 2,
     },
-     {
+    {
       lenda: "E drejta penale dhe procedurë penale ",
       color: "#4D2DB7",
-      viti: 1
+      viti: 1,
     },
-     {
+    {
       lenda: " E drejta civile dhe procedurë civile",
       color: "#183D3D",
-      viti: 1
+      viti: 1,
     },
-     {
+    {
       lenda: "E drejta familjare  dhe e drejta tregtare",
       color: "#FFC436",
-      viti: 2
+      viti: 2,
     },
-     {
+    {
       lenda: "E drejta e BE-së  dhe e drejta ndërkombëtare publike",
       color: "#FF6969",
-      viti: 2
+      viti: 2,
     },
-     {
+    {
       lenda: "Gjuha shqipe",
       color: "#5C5470",
-      viti: 1
+      viti: 1,
     },
-         {
+    {
       lenda: "Etika dhe sjellja qytetare",
       color: "#974EC3",
-      viti: 2
+      viti: 2,
     },
-
-  ]
+  ];
 
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [selectedItem, setSelectedItem] = useState(klasaDropdownOptions[0]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
-  const [selectedSubject, setSelectedSubject] = useState<any>("")
-  
+  const [selectedSubject, setSelectedSubject] = useState<any>("");
 
   const [newEvent, setNewEvent] = useState<any>({
-    title: selectedItem,
+    title: "",
     description: "",
     start: new Date(),
     end: new Date(),
     lenda: selectedSubject.lenda as string,
     professor: "",
-    color: selectedSubject.color
+    color: selectedSubject.color,
   });
-
-
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -112,21 +107,20 @@ const MyCalendar: React.FC = () => {
   };
 
   useEffect(() => {
-    setNewEvent({ ...newEvent, title: selectedItem});
+    setNewEvent({ ...newEvent, title: selectedItem });
   }, [selectedItem]);
 
-  const [showEditModal ,setShowEditModal] = useState(false)
+  console.log(newEvent, "selectedItem");
+
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const handleEventClick = (event) => {
     setEditingEvent({ ...event });
-    setShowEditModal(true)
+    setShowEditModal(true);
   };
-
-
 
   const handleInputChange = (name: string, value: string) => {
     if (name === "date") {
-   
       const newStartDate = dayjs(value)
         .hour(dayjs(newEvent.start).hour())
         .minute(dayjs(newEvent.start).minute());
@@ -140,7 +134,6 @@ const MyCalendar: React.FC = () => {
         end: newEndDate.toDate(),
       });
     } else if (name === "start" || name === "end") {
-   
       setNewEvent({ ...newEvent, [name]: value });
     } else {
       setNewEvent({ ...newEvent, [name]: value });
@@ -185,7 +178,6 @@ const MyCalendar: React.FC = () => {
     );
   };
 
-
   const handleEventCreation = () => {
     // Create a new event
     const newEventToAdd = {
@@ -195,11 +187,8 @@ const MyCalendar: React.FC = () => {
       end: newEvent.end,
       lenda: selectedSubject.lenda,
       professor: newEvent.name,
-      color: selectedSubject.color
+      color: selectedSubject.color,
     };
-
-    console.log(newEventToAdd, "new event to add")
-    console.log(newEvent, "newEvent")
 
     // Update the events state with the new event
     setEvents((prevEvents) => [...prevEvents, newEventToAdd]);
@@ -212,7 +201,7 @@ const MyCalendar: React.FC = () => {
       end: new Date(),
       lenda: selectedSubject.lenda,
       professor: "",
-      color: ""
+      color: "",
     });
 
     // Update the filteredEvents state based on the selectedItem
@@ -221,7 +210,7 @@ const MyCalendar: React.FC = () => {
       updatedFilteredEvents.push(newEventToAdd);
     }
     setFilteredEvents(updatedFilteredEvents);
-form.resetFields();
+    form.resetFields();
     setIsModalOpen(false);
   };
 
@@ -267,53 +256,66 @@ form.resetFields();
     }
   };
 
+  const getParentElement = (e) => {
+    const element = e.currentTarget;
+    const elementParent = element.parentElement;
+    const parent = elementParent.parentElement;
+    return parent;
+  };
+
   function CustomEvent({ event }) {
     return (
-      <div >
+      <div
+        onMouseEnter={(e) => {
+          if (getParentElement(e)) {
+            getParentElement(e).classList.add("event-full-height");
+          }
+        }}
+        onMouseLeave={(e) => {
+          if (getParentElement(e)) {
+            getParentElement(e).classList.remove("event-full-height");
+          }
+        }}>
         <strong>{event.title}</strong>
         <p>{`Pedagogu i lendes: ${event.professor}`}</p>
         <p>{`Lenda: ${event.lenda}`}</p>
       </div>
     );
-    
   }
 
-const handleSelectChange = (value) => {
-
-  const selectedOption = lendaDropdownOptions.find((option) => option.lenda === value);
-  setSelectedSubject(selectedOption || null);
-};
+  const handleSelectChange = (value) => {
+    const selectedOption = lendaDropdownOptions.find(
+      (option) => option.lenda === value
+    );
+    setSelectedSubject(selectedOption || null);
+  };
 
   function LendaDropDown() {
     return (
       <Form.Item
         name="selectedOption"
         label="Select an option"
-        rules={[{ required: true, message: 'Please select an option' }]}
-      >
-<Select
-  placeholder="Select an option"
-  value={selectedSubject ? selectedSubject.lenda : undefined}
-  onChange={(value) => handleSelectChange(value)}
->
-  {lendaDropdownOptions.map((option: any, index) => (
-    <Option key={index} value={option.lenda}>
-      {option.lenda}
-    </Option>
-  ))}
-</Select>
+        rules={[{ required: true, message: "Please select an option" }]}>
+        <Select
+          placeholder="Select an option"
+          value={selectedSubject ? selectedSubject.lenda : undefined}
+          onChange={(value) => handleSelectChange(value)}>
+          {lendaDropdownOptions.map((option: any, index) => (
+            <Option key={index} value={option.lenda}>
+              {option.lenda}
+            </Option>
+          ))}
+        </Select>
       </Form.Item>
-    )
+    );
   }
 
-
-
   const handleItemSelect = (item) => {
+    form.resetFields();
     setSelectedItem(item);
     const filtered = events.filter((event) => event.title === item);
     setFilteredEvents(filtered);
   };
-
 
   const handleStartTimeChange = (time, timeString) => {
     handleInputChange("start", time);
@@ -322,7 +324,6 @@ const handleSelectChange = (value) => {
   const handleEndTimeChange = (time, timeString) => {
     handleInputChange("end", time);
   };
-
 
   function CustomDropdown({ selectedItem, onItemSelect, options }) {
     return (
@@ -349,13 +350,8 @@ const handleSelectChange = (value) => {
     }
   };
 
-
-
-   const eventStyleGetter = (event) => {
- 
-    const backgroundColor = event.color
-
-    console.log(event, "event")
+  const eventStyleGetter = (event) => {
+    const backgroundColor = event.color;
 
     const style = {
       backgroundColor,
@@ -371,66 +367,43 @@ const handleSelectChange = (value) => {
     };
   };
 
-    const calendarStyle = {
+  const calendarStyle = {
     height: "1200px", // Adjust the height as needed
   };
 
-// const eventHeight = document.querySelector(".rbc-event");
-
-// useEffect(() => {
-//   if (eventHeight) {
-//   eventHeight.addEventListener("mouseover", () => {
-//     eventHeight.classList.add("event-full-height"); // Remove the dot before the class name
-//     console.log("entered");
-//   });
-//  eventHeight.addEventListener("mouseleave", () => {
-//     eventHeight.classList.remove("event-full-height");
-//     console.log("leave");
-//   })
- 
-// }
-// })
-
-// Function to add a class on mouse enter
-
-
-
-
-
-
- 
-
-
   return (
     <div>
-      <div
-       style={calendarStyle}>   
-       <Calendar
-        localizer={localizer}
-        events={filteredEvents}
-        startAccessor="start"
-        endAccessor="end"
-        date={currentDate}
-        components={{
-          toolbar: customToolbar,
-          event: CustomEvent,
-        }}
-        defaultView="week"
-        onSelectSlot={(slotInfo: any) =>
-          setNewEvent({
-            start: slotInfo.start,
-            end: slotInfo.end,
-          })
-        }
-        eventPropGetter={eventStyleGetter}
-        onSelectEvent={handleEventClick}
-           min={workingHoursStart}
-        max={workingHoursEnd} 
-        
-      /></div>
-   
-      <Modal title="Modifiko lenden" visible={showEditModal} onCancel={() => setShowEditModal(false)}>
-          {editingEvent && <Form>
+      <div style={calendarStyle}>
+        <Calendar
+          localizer={localizer}
+          events={filteredEvents}
+          startAccessor="start"
+          endAccessor="end"
+          date={currentDate}
+          components={{
+            toolbar: customToolbar,
+            event: CustomEvent,
+          }}
+          defaultView="week"
+          onSelectSlot={(slotInfo: any) =>
+            setNewEvent({
+              start: slotInfo.start,
+              end: slotInfo.end,
+            })
+          }
+          eventPropGetter={eventStyleGetter}
+          onSelectEvent={handleEventClick}
+          min={workingHoursStart}
+          max={workingHoursEnd}
+        />
+      </div>
+
+      <Modal
+        title="Modifiko lenden"
+        visible={showEditModal}
+        onCancel={() => setShowEditModal(false)}>
+        {editingEvent && (
+          <Form>
             <Form.Item label="Title">
               <Input
                 name="title"
@@ -483,75 +456,78 @@ const handleSelectChange = (value) => {
                 Delete Event
               </Button>
             </Form.Item>
-          </Form>}
-          </Modal>
-          
+          </Form>
+        )}
+      </Modal>
+
       <Modal
         title="Shto lende ne orar"
         visible={isModalOpen} // Use "visible" instead of "open"
         onOk={handleEventCreation}
         onCancel={handleCancel}>
-          <Form form={form}>
-        <Form.Item
-          label="Title"
-          name="title"
-          rules={[{ required: true, message: "Please enter the title" }]}>
-          <Input
-            type="text"
+        <Form form={form}>
+          <Form.Item
+            label="Title"
             name="title"
-            value={newEvent.title}
-            onChange={(e) => handleInputChange(e.target.name, e.target.value)}
-            defaultValue={newEvent.title}
-          />
-        </Form.Item>
-<Form.Item
-      label="Name"
-      name="name"
-      rules={[{ required: true, message: "Please enter the name" }]}
-    >
-      <Input
-        type="text"
-        name="name"
-        value={newEvent.professor}
-        onChange={(e) => handleInputChange(e.target.name, e.target.value)}
-      />
-    </Form.Item>
-        <Form.Item
-          label="Start Time"
-          name="start"
-          rules={[{ required: true, message: "Please select the start time" }]}>
-          <TimePicker
-            format="HH:mm"
+            rules={[{ required: true, message: "Please enter the title" }]}>
+            <Input
+              type="text"
+              name="title"
+              value={newEvent.title}
+              onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+              defaultValue={newEvent.title}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Name"
+            name="name"
+            rules={[{ required: true, message: "Please enter the name" }]}>
+            <Input
+              type="text"
+              name="name"
+              value={newEvent.professor}
+              onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Start Time"
             name="start"
-            value={dayjs(newEvent.start)}
-            onChange={handleStartTimeChange}
-          />
-        </Form.Item>
-        
-        <Form.Item
-          label="End Time"
-          name="end"
-          rules={[{ required: true, message: "Please select the end time" }]}>
-          <TimePicker
-            format="HH:mm"
+            rules={[
+              { required: true, message: "Please select the start time" },
+            ]}>
+            <TimePicker
+              format="HH:mm"
+              name="start"
+              value={dayjs(newEvent.start)}
+              onChange={handleStartTimeChange}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="End Time"
             name="end"
-            value={dayjs(newEvent.end)}
-            onChange={handleEndTimeChange}
-          />
-        </Form.Item><LendaDropDown/>
-        <Form.Item
-          label="Date"
-          name="date"
-          rules={[{ required: true, message: "Please select a date" }]}>
-          <DatePicker
-            format="YYYY-MM-DD"
+            rules={[{ required: true, message: "Please select the end time" }]}>
+            <TimePicker
+              format="HH:mm"
+              name="end"
+              value={dayjs(newEvent.end)}
+              onChange={handleEndTimeChange}
+            />
+          </Form.Item>
+          <LendaDropDown />
+          <Form.Item
+            label="Date"
             name="date"
-            value={dayjs(newEvent.start)}
-            onChange={(date, dateString) =>
-              handleInputChange("date", dateString)
-            }
-          />
-        </Form.Item>
+            rules={[{ required: true, message: "Please select a date" }]}>
+            <DatePicker
+              format="YYYY-MM-DD"
+              name="date"
+              value={dayjs(newEvent.start)}
+              onChange={(date, dateString) =>
+                handleInputChange("date", dateString)
+              }
+            />
+          </Form.Item>
         </Form>
       </Modal>
     </div>
