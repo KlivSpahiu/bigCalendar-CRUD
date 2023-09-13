@@ -31,7 +31,7 @@
 }
 
 .event-full-height{
-    height: 15% !important;
+    height: 25% !important;
     transition: ease-in-out .2s;
     opacity: 1 !important;
     z-index: 5;

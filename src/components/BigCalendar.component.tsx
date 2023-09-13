@@ -14,7 +14,6 @@ import Moment from "moment";
 import { useForm } from "antd/lib/form/Form";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../components/BigCalendar.css";
-import { title } from "process";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -38,6 +37,8 @@ const MyCalendar: React.FC = () => {
     lenda: selectedSubject.lenda as string,
     professor: "",
     color: selectedSubject.color,
+    professor2: "",
+    ore: ""
   });
   const klasaDropdownOptions = [
     "KLASA A",
@@ -146,8 +147,11 @@ const MyCalendar: React.FC = () => {
       lenda: selectedSubject.lenda,
       professor: newEvent.name,
       color: selectedSubject.color,
+      professor2: newEvent.professor2,
+      ore: newEvent.ore
     };
 
+    console.log(newEventToAdd, "newEventTo Add")
 
     setEvents((prevEvents) => [...prevEvents, newEventToAdd]);
 
@@ -159,6 +163,8 @@ const MyCalendar: React.FC = () => {
       lenda: selectedSubject.lenda,
       professor: "",
       color: "",
+      professor2: "",
+      ore: ""
     });
     const updatedFilteredEvents = [...filteredEvents];
     if (selectedItem === newEventToAdd.title) {
@@ -254,7 +260,7 @@ const MyCalendar: React.FC = () => {
       
       <div
         onMouseEnter={(e) => {
-          if (getParentElement(e) && getParentElement(e).style.height.replace(/\d% ?/g, "") < 14 ) {
+          if (getParentElement(e) && getParentElement(e).style.height.replace(/\d% ?/g, "") < 20 ) {
             getParentElement(e).classList.add("event-full-height");
           }
         }}
@@ -264,8 +270,11 @@ const MyCalendar: React.FC = () => {
           }
         }}>
         <strong>{event.title}</strong>
-        <p>{`Pedagogu i lendes: ${event.professor}`}</p>
-        <p>{`Lenda: ${event.lenda}`}</p>
+        <p><strong>Pedagogu pergjegjes:</strong>{event.professor}</p>
+        <p><strong>Pedagogu i lendes:</strong>{event.professor2}</p>
+         <p><strong>Nr. i oreve:</strong>{event.ore}</p>
+        <p><strong>Lenda:</strong>{event.lenda}</p>
+      
       </div>
     );
   }
@@ -322,10 +331,10 @@ const MyCalendar: React.FC = () => {
     return (
       <Form.Item
         name="selectedOption"
-        label="Select an option"
+        label="Zgjidhni lenden"
         rules={[{ required: true, message: "Please select an option" }]}>
         <Select
-          placeholder="Select an option"
+          placeholder="Zgjidhni nje lende ..."
           value={selectedSubject ? selectedSubject.lenda : undefined}
           onChange={(value) => handleSelectChange(value)}>
           {lendaDropdownOptions.map((option: any, index) => (
@@ -492,8 +501,9 @@ const MyCalendar: React.FC = () => {
               defaultValue={newEvent.title}
             />
           </Form.Item>
+          <LendaDropDown />
           <Form.Item
-            label="Pedagogu"
+            label="Pedagogu pergjegjes"
             name="name"
             rules={[{ required: true, message: "Please enter the name" }]}>
             <Input
@@ -503,7 +513,30 @@ const MyCalendar: React.FC = () => {
               onChange={(e) => handleInputChange(e.target.name, e.target.value)}
             />
           </Form.Item>
-          <Form.Item
+        <Form.Item
+            label="Pedagogu i lendes"
+            name="professor2"
+            rules={[{ required: true, message: "Please enter the name" }]}>
+            <Input
+              type="text"
+              name="professor2"
+              value={newEvent.professor2}
+              onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+            />
+          </Form.Item>
+                  <Form.Item
+            label="Nr. i orëve"
+            name="ore"
+            rules={[{ required: true, message: "Please enter the name" }]}>
+            <Input
+              type="number"
+              name="ore"
+              value={newEvent.professor2}
+              onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+            />
+          </Form.Item>
+          
+            <Form.Item
             label="Start Time"
             name="start"
             rules={[
@@ -528,7 +561,6 @@ const MyCalendar: React.FC = () => {
               onChange={handleEndTimeChange}
             />
           </Form.Item>
-          <LendaDropDown />
           <Form.Item
             label="Data"
             name="date"
@@ -542,6 +574,11 @@ const MyCalendar: React.FC = () => {
               }
             />
           </Form.Item>
+         
+          
+          
+          
+          
         </Form>
       </Modal>
     </div>
