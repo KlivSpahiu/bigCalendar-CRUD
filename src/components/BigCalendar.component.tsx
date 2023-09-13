@@ -83,9 +83,7 @@ const MyCalendar: React.FC = () => {
   ];
 
   const [filteredEvents, setFilteredEvents] = useState([]);
-  const [selectedItem, setSelectedItem] = useState<any>(
-    klasaDropdownOptions[0]
-  );
+  const [selectedItem, setSelectedItem] = useState(klasaDropdownOptions[0]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [selectedSubject, setSelectedSubject] = useState<any>("");
@@ -112,33 +110,15 @@ const MyCalendar: React.FC = () => {
     setNewEvent({ ...newEvent, title: selectedItem });
   }, [selectedItem]);
 
-
+  console.log(newEvent, "selectedItem");
 
   const [showEditModal, setShowEditModal] = useState(false);
 
-  const handleEventClick = (eventInfos) => {
-    console.log(editingEvent, "editingEvent")
-    setEditingEvent({ ...eventInfos });
+  const handleEventClick = (event) => {
+    setEditingEvent({ ...event });
     setShowEditModal(true);
-
   };
 
-  const initialEditValues = () => {
-    const initialValues = []
-
-    for (const key in editingEvent) {
-      initialValues.push({
-        name: key,
-        value: editingEvent[key]
-      })
-  }
-
-  return initialValues
-  }
-
-  console.log(initialEditValues(),'initial')
-
- 
   const handleInputChange = (name: string, value: string) => {
     if (name === "date") {
       const newStartDate = dayjs(value)
@@ -250,33 +230,31 @@ const MyCalendar: React.FC = () => {
     );
 
     if (eventIndex !== -1) {
+      // Update the event in the events array
       const updatedEvents = [...events];
       updatedEvents[eventIndex] = editingEvent;
 
       setEvents(updatedEvents);
-      setEditingEvent(null);
+      setEditingEvent(null); // Clear the editing state
     } else {
+      // Handle the case where the event with the given ID is not found
       console.error("Event not found for editing.");
     }
   };
 
-  const handleEventDelete = () => {
-    if (editingEvent) {
-      const eventsArray = filteredEvents.filter(
-        (event) => event.lenda !== editingEvent.lenda
-      );
-      setFilteredEvents(eventsArray);
-      setShowEditModal(false)
-
-      console.log(eventsArray, "updatedEvents")
-
-    }
+  const deleteEvent = (eventId) => {
+    const updatedEvents = events.filter((event) => event.id !== eventId);
+    setEvents(updatedEvents);
   };
 
-  console.log(filteredEvents, "filteredEvents")
-
-
-
+  const handleEventDelete = (event) => {
+    const confirmDelete = window.confirm(
+      `Are you sure you want to delete the event "${event.title}"?`
+    );
+    if (confirmDelete) {
+      deleteEvent(event.id);
+    }
+  };
 
   const getParentElement = (e) => {
     const element = e.currentTarget;
@@ -393,30 +371,6 @@ const MyCalendar: React.FC = () => {
     height: "1200px", // Adjust the height as needed
   };
 
-
-  console.log("form.getFieldsValue():", form.getFieldsValue())
-
-  const editFormFooter = () => {
-    return (
-                  <Form.Item>
-              <Button type="default" onClick={handleEventUpdate}>
-                Update Event
-              </Button>
-              <Button type="primary" onClick={handleEventDelete}>
-                Delete Event
-              </Button>
-            </Form.Item>
-    )
-  }
-
-
-  const CustomModalHeader = () => {
-    return (
-      <div >
-        <h2 style={{ margin: 0, color: '#003666' }}>Shto lende ne orar</h2>
-      </div>
-    );
-  };
   return (
     <div>
       <div style={calendarStyle}>
@@ -447,35 +401,28 @@ const MyCalendar: React.FC = () => {
       <Modal
         title="Modifiko lenden"
         visible={showEditModal}
-        onCancel={() => setShowEditModal(false)}
-        footer={editFormFooter}
-        >
-      
-        
-          <Form form={form} initialValues={editingEvent} >
-            <Form.Item label="Title" name="title">
+        onCancel={() => setShowEditModal(false)}>
+        {editingEvent && (
+          <Form>
+            <Form.Item label="Title">
               <Input
-                
-                // value={editingEvent.title}
+                name="title"
+                value={editingEvent.title || ""}
                 onChange={handleEditInputChange}
               />
             </Form.Item>
-            <Form.Item
-            label="Name"
-            name="professor"
-            rules={[{ required: true, message: "Please enter the name" }]}>
-            <Input
-              type="text"
-              
-              onChange={(e) => handleEditInputChange( e.target.value)}
-            />
-          </Form.Item>
-{/*             
+            <Form.Item label="Description">
+              <TextArea
+                name="description"
+                value={editingEvent.description}
+                onChange={handleEditInputChange}
+              />
+            </Form.Item>
             <Form.Item label="Start Time">
               <TimePicker
                 format="HH:mm"
                 name="start"
-
+                value={parseTime(editingEvent.start)}
                 onChange={(time, timeString) =>
                   handleEditInputChange({
                     target: {
@@ -490,7 +437,7 @@ const MyCalendar: React.FC = () => {
               <TimePicker
                 format="HH:mm"
                 name="end"
-            
+                value={parseTime(editingEvent.end)}
                 onChange={(time, timeString) =>
                   handleEditInputChange({
                     target: {
@@ -500,20 +447,37 @@ const MyCalendar: React.FC = () => {
                   })
                 }
               />
-            </Form.Item> */}
-
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" onClick={handleEventUpdate}>
+                Update Event
+              </Button>
+              <Button type="primary" onClick={handleEventDelete}>
+                Delete Event
+              </Button>
+            </Form.Item>
           </Form>
-        
+        )}
       </Modal>
 
       <Modal
-        title={<CustomModalHeader />}
-        centered
-        visible={isModalOpen} 
+        title="Shto lende ne orar"
+        visible={isModalOpen} // Use "visible" instead of "open"
         onOk={handleEventCreation}
         onCancel={handleCancel}>
         <Form form={form}>
-        <LendaDropDown />
+          <Form.Item
+            label="Title"
+            name="title"
+            rules={[{ required: true, message: "Please enter the title" }]}>
+            <Input
+              type="text"
+              name="title"
+              value={newEvent.title}
+              onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+              defaultValue={newEvent.title}
+            />
+          </Form.Item>
           <Form.Item
             label="Name"
             name="name"
@@ -526,20 +490,6 @@ const MyCalendar: React.FC = () => {
             />
           </Form.Item>
           <Form.Item
-            label="Date"
-            name="date"
-            rules={[{ required: true, message: "Please select a date" }]}>
-            <DatePicker
-              format="YYYY-MM-DD"
-              name="date"
-              value={dayjs(newEvent.start)}
-              onChange={(date, dateString) =>
-                handleInputChange("date", dateString)
-              }
-            />
-          </Form.Item>
-          <div style={{display: "flex", justifyContent: "space-between"}}>
-            <Form.Item
             label="Start Time"
             name="start"
             rules={[
@@ -564,20 +514,18 @@ const MyCalendar: React.FC = () => {
               onChange={handleEndTimeChange}
             />
           </Form.Item>
-          </div>
-          
-          
-          
-                   <Form.Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: "Please enter the title" }]}>
-            <TextArea
-              
-              name="title"
-              value={selectedItem.title}
-              onChange={(e) => handleInputChange(e.target.name, e.target.value)}
-              defaultValue={selectedItem.title as string}
+          <LendaDropDown />
+          <Form.Item
+            label="Date"
+            name="date"
+            rules={[{ required: true, message: "Please select a date" }]}>
+            <DatePicker
+              format="YYYY-MM-DD"
+              name="date"
+              value={dayjs(newEvent.start)}
+              onChange={(date, dateString) =>
+                handleInputChange("date", dateString)
+              }
             />
           </Form.Item>
         </Form>

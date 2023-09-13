@@ -11,6 +11,10 @@
     
 }
 
+.rbc-events-container{
+    margin-right: 0 !important;
+}
+
 .week-button{
     background-color: #4F46E5;
     padding: 0.5rem 1.5rem;
