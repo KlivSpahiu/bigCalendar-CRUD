@@ -14,6 +14,7 @@ import Moment from "moment";
 import { useForm } from "antd/lib/form/Form";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 import "../components/BigCalendar.css";
+import { title } from "process";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -22,7 +23,22 @@ const localizer = momentLocalizer(Moment);
 
 const MyCalendar: React.FC = () => {
   const [events, setEvents] = useState<any>([]);
-
+    const [filteredEvents, setFilteredEvents] = useState([]);
+  
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [selectedSubject, setSelectedSubject] = useState<any>("");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [newEvent, setNewEvent] = useState<any>({
+    title: "",
+    description: "",
+    start: new Date(),
+    end: new Date(),
+    lenda: selectedSubject.lenda as string,
+    professor: "",
+    color: selectedSubject.color,
+  });
   const klasaDropdownOptions = [
     "KLASA A",
     "KLASA B",
@@ -30,7 +46,7 @@ const MyCalendar: React.FC = () => {
     "KLASA D",
     "KLASA E",
   ];
-
+  const [selectedItem, setSelectedItem] = useState(klasaDropdownOptions[0]);
   const [form] = useForm();
 
   const workingHoursStart = new Date();
@@ -82,25 +98,6 @@ const MyCalendar: React.FC = () => {
     },
   ];
 
-  const [filteredEvents, setFilteredEvents] = useState([]);
-  const [selectedItem, setSelectedItem] = useState(klasaDropdownOptions[0]);
-  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [editingEvent, setEditingEvent] = useState<any>(null);
-  const [selectedSubject, setSelectedSubject] = useState<any>("");
-
-  const [newEvent, setNewEvent] = useState<any>({
-    title: "",
-    description: "",
-    start: new Date(),
-    end: new Date(),
-    lenda: selectedSubject.lenda as string,
-    professor: "",
-    color: selectedSubject.color,
-  });
-
-  const showModal = () => {
-    setIsModalOpen(true);
-  };
 
   const handleCancel = () => {
     setIsModalOpen(false);
@@ -110,9 +107,6 @@ const MyCalendar: React.FC = () => {
     setNewEvent({ ...newEvent, title: selectedItem });
   }, [selectedItem]);
 
-  console.log(newEvent, "selectedItem");
-
-  const [showEditModal, setShowEditModal] = useState(false);
 
   const handleEventClick = (event) => {
     setEditingEvent({ ...event });
@@ -124,10 +118,11 @@ const MyCalendar: React.FC = () => {
       const newStartDate = dayjs(value)
         .hour(dayjs(newEvent.start).hour())
         .minute(dayjs(newEvent.start).minute());
+        console.log(newStartDate, "newStartDate")
       const newEndDate = dayjs(value)
         .hour(dayjs(newEvent.end).hour())
         .minute(dayjs(newEvent.end).minute());
-
+console.log(newEndDate, "END DATE")
       setNewEvent({
         ...newEvent,
         start: newStartDate.toDate(),
@@ -140,7 +135,82 @@ const MyCalendar: React.FC = () => {
     }
   };
 
-  const [currentDate, setCurrentDate] = useState(new Date());
+  
+
+  const handleEventCreation = () => {
+    // Create a new event
+    const newEventToAdd = {
+      title: newEvent.title,
+      description: newEvent.description,
+      start: newEvent.start,
+      end: newEvent.end,
+      lenda: selectedSubject.lenda,
+      professor: newEvent.name,
+      color: selectedSubject.color,
+    };
+
+
+    setEvents((prevEvents) => [...prevEvents, newEventToAdd]);
+
+    setNewEvent({
+      title: selectedItem,
+      description: "",
+      start: new Date(),
+      end: new Date(),
+      lenda: selectedSubject.lenda,
+      professor: "",
+      color: "",
+    });
+    const updatedFilteredEvents = [...filteredEvents];
+    if (selectedItem === newEventToAdd.title) {
+      updatedFilteredEvents.push(newEventToAdd);
+    }
+    setFilteredEvents(updatedFilteredEvents);
+    form.resetFields();
+    setIsModalOpen(false);
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditingEvent({
+      ...editingEvent,
+      [name]: value,
+    });
+  };
+
+  const handleEventUpdate = () => {
+    const eventIndex = events.findIndex(
+      (event) => event.id === editingEvent.id
+    );
+
+    if (eventIndex !== -1) {
+      const updatedEvents = [...events];
+      updatedEvents[eventIndex] = editingEvent;
+
+      setEvents(updatedEvents);
+      setEditingEvent(null); 
+    } else {
+      console.error("Event not found for editing.");
+    }
+  };
+
+  const deleteEvent = (eventId) => {
+    const updatedEvents = events.filter((event) => event.id !== eventId);
+    setEvents(updatedEvents);
+  };
+
+  const handleEventDelete = (event) => {
+    
+      deleteEvent(event.id);
+  
+  };
+
+  const getParentElement = (e) => {
+    const element = e.currentTarget;
+    const elementParent = element.parentElement;
+    const parent = elementParent.parentElement;
+    return parent;
+  };
 
   const customToolbar = () => {
     const goToNextWeek = () => {
@@ -171,96 +241,11 @@ const MyCalendar: React.FC = () => {
         <Button
           type="primary"
           style={{ backgroundColor: "#FF731D" }}
-          onClick={showModal}>
+          onClick={() => setIsModalOpen(true)}>
           Shto lende
         </Button>
       </div>
     );
-  };
-
-  const handleEventCreation = () => {
-    // Create a new event
-    const newEventToAdd = {
-      title: newEvent.title,
-      description: newEvent.description,
-      start: newEvent.start,
-      end: newEvent.end,
-      lenda: selectedSubject.lenda,
-      professor: newEvent.name,
-      color: selectedSubject.color,
-    };
-
-    // Update the events state with the new event
-    setEvents((prevEvents) => [...prevEvents, newEventToAdd]);
-
-    // Clear the form or set newEvent to initial values
-    setNewEvent({
-      title: selectedItem,
-      description: "",
-      start: new Date(),
-      end: new Date(),
-      lenda: selectedSubject.lenda,
-      professor: "",
-      color: "",
-    });
-
-    // Update the filteredEvents state based on the selectedItem
-    const updatedFilteredEvents = [...filteredEvents];
-    if (selectedItem === newEventToAdd.title) {
-      updatedFilteredEvents.push(newEventToAdd);
-    }
-    setFilteredEvents(updatedFilteredEvents);
-    form.resetFields();
-    setIsModalOpen(false);
-  };
-
-  const handleEditInputChange = (e) => {
-    const { name, value } = e.target;
-    // Assuming `editingEvent` is stored as state
-    setEditingEvent({
-      ...editingEvent,
-      [name]: value,
-    });
-  };
-
-  const handleEventUpdate = () => {
-    // Find the index of the edited event
-    const eventIndex = events.findIndex(
-      (event) => event.id === editingEvent.id
-    );
-
-    if (eventIndex !== -1) {
-      // Update the event in the events array
-      const updatedEvents = [...events];
-      updatedEvents[eventIndex] = editingEvent;
-
-      setEvents(updatedEvents);
-      setEditingEvent(null); // Clear the editing state
-    } else {
-      // Handle the case where the event with the given ID is not found
-      console.error("Event not found for editing.");
-    }
-  };
-
-  const deleteEvent = (eventId) => {
-    const updatedEvents = events.filter((event) => event.id !== eventId);
-    setEvents(updatedEvents);
-  };
-
-  const handleEventDelete = (event) => {
-    const confirmDelete = window.confirm(
-      `Are you sure you want to delete the event "${event.title}"?`
-    );
-    if (confirmDelete) {
-      deleteEvent(event.id);
-    }
-  };
-
-  const getParentElement = (e) => {
-    const element = e.currentTarget;
-    const elementParent = element.parentElement;
-    const parent = elementParent.parentElement;
-    return parent;
   };
 
   function CustomEvent({ event }) {
@@ -290,7 +275,48 @@ const MyCalendar: React.FC = () => {
     setSelectedSubject(selectedOption || null);
   };
 
-  function LendaDropDown() {
+
+
+  const handleItemSelect = (item) => {
+    form.resetFields();
+    setSelectedItem(item);
+    const filtered = events.filter((event) => event.title === item);
+    setFilteredEvents(filtered);
+  };
+
+  const handleStartTimeChange = (time) => {
+    handleInputChange("start", time);
+  };
+
+  const handleEndTimeChange = (time) => {
+    handleInputChange("end", time);
+  };
+
+  const parseTime = (timeString) => {
+    
+      if (timeString) {
+        const parsedTime = dayjs(timeString, "HH:mm");
+        return parsedTime;
+        
+      }
+      return null;
+    
+  };
+
+  
+  function CustomDropdown({ selectedItem, onItemSelect, options }) {
+    return (
+      <Select value={selectedItem} onChange={onItemSelect}>
+        {options.map((option) => (
+          <Option key={option} value={option}>
+            {option}
+          </Option>
+        ))}
+      </Select>
+    );
+  }
+
+    function LendaDropDown() {
     return (
       <Form.Item
         name="selectedOption"
@@ -310,47 +336,7 @@ const MyCalendar: React.FC = () => {
     );
   }
 
-  const handleItemSelect = (item) => {
-    form.resetFields();
-    setSelectedItem(item);
-    const filtered = events.filter((event) => event.title === item);
-    setFilteredEvents(filtered);
-  };
-
-  const handleStartTimeChange = (time, timeString) => {
-    handleInputChange("start", time);
-  };
-
-  const handleEndTimeChange = (time, timeString) => {
-    handleInputChange("end", time);
-  };
-
-  function CustomDropdown({ selectedItem, onItemSelect, options }) {
-    return (
-      <Select value={selectedItem} onChange={onItemSelect}>
-        {options.map((option) => (
-          <Option key={option} value={option}>
-            {option}
-          </Option>
-        ))}
-      </Select>
-    );
-  }
-
-  const parseTime = (timeString) => {
-    try {
-      if (timeString) {
-        const parsedTime = dayjs(timeString, "HH:mm");
-        return parsedTime;
-      }
-      return null;
-    } catch (error) {
-      console.error("Error parsing time:", error);
-      return null;
-    }
-  };
-
-  const eventStyleGetter = (event) => {
+  const eventCardStyle = (event) => {
     const backgroundColor = event.color;
 
     const style = {
@@ -358,8 +344,8 @@ const MyCalendar: React.FC = () => {
       borderRadius: "0",
       opacity: 0.8,
       color: "white",
-      border: "1px solid #ccc",
       display: "block",
+      border: `1px solid white`
     };
 
     return {
@@ -368,8 +354,26 @@ const MyCalendar: React.FC = () => {
   };
 
   const calendarStyle = {
-    height: "1200px", // Adjust the height as needed
+    height: "1200px", 
   };
+
+ 
+
+ const editedEventDefault = () => {
+  const eventData = []
+
+  for(const key in editingEvent) {
+    eventData.push({
+      name: key,
+      value: editingEvent[key]
+    })
+  }
+
+  return eventData
+ }
+
+ console.log(editedEventDefault(), "editedEventDefault")
+
 
   return (
     <div>
@@ -385,13 +389,7 @@ const MyCalendar: React.FC = () => {
             event: CustomEvent,
           }}
           defaultView="week"
-          onSelectSlot={(slotInfo: any) =>
-            setNewEvent({
-              start: slotInfo.start,
-              end: slotInfo.end,
-            })
-          }
-          eventPropGetter={eventStyleGetter}
+          eventPropGetter={eventCardStyle}
           onSelectEvent={handleEventClick}
           min={workingHoursStart}
           max={workingHoursEnd}
@@ -400,17 +398,32 @@ const MyCalendar: React.FC = () => {
 
       <Modal
         title="Modifiko lenden"
-        visible={showEditModal}
+        open={showEditModal}
         onCancel={() => setShowEditModal(false)}>
         {editingEvent && (
-          <Form>
-            <Form.Item label="Title">
-              <Input
-                name="title"
-                value={editingEvent.title || ""}
-                onChange={handleEditInputChange}
-              />
-            </Form.Item>
+          <Form form={form} initialValues={editedEventDefault()}>
+          <Form.Item
+            label="Title"
+            name="title"
+            rules={[{ required: true, message: "Please enter the title" }]}>
+            <Input
+              type="text"
+              name="title"
+              onChange={handleEditInputChange}
+              defaultValue={editingEvent.title}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Name"
+            name="professor"
+            rules={[{ required: true, message: "Please enter the name" }]}>
+            <Input
+              type="text"
+              name="name"
+              value={newEvent.professor}
+              onChange={handleEditInputChange}
+            />
+          </Form.Item>
             <Form.Item label="Description">
               <TextArea
                 name="description"
@@ -422,12 +435,12 @@ const MyCalendar: React.FC = () => {
               <TimePicker
                 format="HH:mm"
                 name="start"
-                value={parseTime(editingEvent.start)}
+                value={dayjs(editingEvent.start)}
                 onChange={(time, timeString) =>
                   handleEditInputChange({
                     target: {
                       name: "start",
-                      value: timeString,
+                      value: time,
                     },
                   })
                 }
@@ -437,12 +450,12 @@ const MyCalendar: React.FC = () => {
               <TimePicker
                 format="HH:mm"
                 name="end"
-                value={parseTime(editingEvent.end)}
+                value={dayjs(editingEvent.end)}
                 onChange={(time, timeString) =>
                   handleEditInputChange({
                     target: {
                       name: "end",
-                      value: timeString,
+                      value: time,
                     },
                   })
                 }
@@ -462,12 +475,12 @@ const MyCalendar: React.FC = () => {
 
       <Modal
         title="Shto lende ne orar"
-        visible={isModalOpen} // Use "visible" instead of "open"
+        open={isModalOpen} 
         onOk={handleEventCreation}
         onCancel={handleCancel}>
         <Form form={form}>
           <Form.Item
-            label="Title"
+            label="Klasa"
             name="title"
             rules={[{ required: true, message: "Please enter the title" }]}>
             <Input
@@ -479,7 +492,7 @@ const MyCalendar: React.FC = () => {
             />
           </Form.Item>
           <Form.Item
-            label="Name"
+            label="Pedagogu"
             name="name"
             rules={[{ required: true, message: "Please enter the name" }]}>
             <Input
@@ -516,7 +529,7 @@ const MyCalendar: React.FC = () => {
           </Form.Item>
           <LendaDropDown />
           <Form.Item
-            label="Date"
+            label="Data"
             name="date"
             rules={[{ required: true, message: "Please select a date" }]}>
             <DatePicker
