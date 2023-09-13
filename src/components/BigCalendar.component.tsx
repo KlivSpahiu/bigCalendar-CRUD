@@ -21,7 +21,7 @@ const { Option } = Select;
 const localizer = momentLocalizer(Moment);
 
 const MyCalendar: React.FC = () => {
-  const [events, setEvents] = useState<any>([]);
+
     const [filteredEvents, setFilteredEvents] = useState([]);
   
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
@@ -40,23 +40,8 @@ const MyCalendar: React.FC = () => {
     professor2: "",
     ore: ""
   });
-  const klasaDropdownOptions = [
-    "KLASA A",
-    "KLASA B",
-    "KLASA C",
-    "KLASA D",
-    "KLASA E",
-  ];
-  const [selectedItem, setSelectedItem] = useState(klasaDropdownOptions[0]);
-  const [form] = useForm();
 
-  const workingHoursStart = new Date();
-  workingHoursStart.setHours(8, 0, 0, 0); // 9:00 AM
-
-  const workingHoursEnd = new Date();
-  workingHoursEnd.setHours(21, 0, 0, 0);
-
-  const lendaDropdownOptions = [
+    const lendaDropdownOptions = [
     {
       lenda: "E drejta kushtetuese dhe të drejtat e njeriut",
       color: "#C63D2F",
@@ -97,7 +82,129 @@ const MyCalendar: React.FC = () => {
       color: "#974EC3",
       viti: 2,
     },
+  ];  const klasaDropdownOptions = [
+    "KLASA A",
+    "KLASA B",
+    "KLASA C",
+    "KLASA D",
+    "KLASA E",
   ];
+
+    const [events, setEvents] = useState<any>([
+    {
+    title: klasaDropdownOptions[0],
+    start: new Date(2023, 8, 11, 12, 0),
+    end: new Date(2023, 8, 11, 13, 0),
+    professor: 'Josh Grant',
+    professor2: 'Ben Smile',
+    ore: "15",
+    color: lendaDropdownOptions[0].color,
+    lenda: lendaDropdownOptions[0].lenda
+    },
+        {
+    title: klasaDropdownOptions[0],
+    start: new Date(2023, 8, 12, 10, 0),
+    end: new Date(2023, 8, 12, 13, 0),
+    professor: 'Adam Grant',
+    professor2: 'Ismail Kadare',
+    ore: "15",
+    color: lendaDropdownOptions[1].color,
+    lenda: lendaDropdownOptions[1].lenda
+    },
+        {
+    title: klasaDropdownOptions[0],
+    start: new Date(2023, 8, 13, 11, 0),
+    end: new Date(2023, 8, 13, 13, 0),
+    professor: 'Yu Hua',
+    professor2: 'Mo Yan',
+    ore: "15",
+    color: lendaDropdownOptions[2].color,
+    lenda: lendaDropdownOptions[2].lenda
+    },
+        {
+    title: klasaDropdownOptions[0],
+    start: new Date(2023, 8, 14, 10, 0),
+    end: new Date(2023, 8, 14, 12, 0),
+    professor: 'Orhan Pamuk',
+    professor2: 'Gjergj Fishta',
+    ore: "15",
+    color: lendaDropdownOptions[3].color,
+    lenda: lendaDropdownOptions[3].lenda
+    },
+            {
+    title: klasaDropdownOptions[0],
+    start: new Date(2023, 8, 15, 11, 0),
+    end: new Date(2023, 8, 15, 13, 0),
+    professor: 'Orhan Pamuk',
+    professor2: 'Gjergj Fishta',
+    ore: "15",
+    color: lendaDropdownOptions[4].color,
+    lenda: lendaDropdownOptions[4].lenda
+    },
+    {
+    title: klasaDropdownOptions[0],
+    start: new Date(2023, 8, 11, 13, 0),
+    end: new Date(2023, 8, 11, 15, 0),
+    professor: 'Josh Grant',
+    professor2: 'Ben Smile',
+    ore: "15",
+    color: lendaDropdownOptions[4].color,
+    lenda: lendaDropdownOptions[4].lenda
+    },
+        {
+    title: klasaDropdownOptions[0],
+    start: new Date(2023, 8, 12, 13, 0),
+    end: new Date(2023, 8, 12, 16, 0),
+    professor: 'Adam Grant',
+    professor2: 'Ismail Kadare',
+    ore: "15",
+    color: lendaDropdownOptions[3].color,
+    lenda: lendaDropdownOptions[3].lenda
+    },
+        {
+    title: klasaDropdownOptions[0],
+    start: new Date(2023, 8, 13, 13, 0),
+    end: new Date(2023, 8, 13, 15, 0),
+    professor: 'Yu Hua',
+    professor2: 'Mo Yan',
+    ore: "15",
+    color: lendaDropdownOptions[5].color,
+    lenda: lendaDropdownOptions[5].lenda
+    },
+        {
+    title: klasaDropdownOptions[0],
+    start: new Date(2023, 8, 14, 12, 0),
+    end: new Date(2023, 8, 14, 16, 0),
+    professor: 'Orhan Pamuk',
+    professor2: 'Gjergj Fishta',
+    ore: "15",
+    color: lendaDropdownOptions[6].color,
+    lenda: lendaDropdownOptions[6].lenda
+    },
+            {
+    title: klasaDropdownOptions[0],
+    start: new Date(2023, 8, 15, 13, 0),
+    end: new Date(2023, 8, 15, 14, 0),
+    professor: 'Orhan Pamuk',
+    professor2: 'Gjergj Fishta',
+    ore: "15",
+    color: lendaDropdownOptions[7].color,
+    lenda: lendaDropdownOptions[7].lenda
+    },
+    
+    
+  ]);
+
+  const [selectedItem, setSelectedItem] = useState(klasaDropdownOptions[0]);
+  const [form] = useForm();
+
+  const workingHoursStart = new Date();
+  workingHoursStart.setHours(8, 0, 0, 0); // 9:00 AM
+
+  const workingHoursEnd = new Date();
+  workingHoursEnd.setHours(21, 0, 0, 0);
+
+
 
 
   const handleCancel = () => {
@@ -260,7 +367,7 @@ const MyCalendar: React.FC = () => {
       
       <div
         onMouseEnter={(e) => {
-          if (getParentElement(e) && getParentElement(e).style.height.replace(/\d% ?/g, "") < 20 ) {
+          if (getParentElement(e) && getParentElement(e).style.height.replace(/\d% ?/g, "") < 23 ) {
             getParentElement(e).classList.add("event-full-height");
           }
         }}
@@ -274,6 +381,7 @@ const MyCalendar: React.FC = () => {
         <p><strong>Pedagogu i lendes:</strong>{event.professor2}</p>
          <p><strong>Nr. i oreve:</strong>{event.ore}</p>
         <p><strong>Lenda:</strong>{event.lenda}</p>
+        <p ><strong>Status:</strong> <span className="status">pa plotesuar</span></p>
       
       </div>
     );
