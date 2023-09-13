@@ -118,11 +118,10 @@ const MyCalendar: React.FC = () => {
       const newStartDate = dayjs(value)
         .hour(dayjs(newEvent.start).hour())
         .minute(dayjs(newEvent.start).minute());
-        console.log(newStartDate, "newStartDate")
+        
       const newEndDate = dayjs(value)
         .hour(dayjs(newEvent.end).hour())
         .minute(dayjs(newEvent.end).minute());
-console.log(newEndDate, "END DATE")
       setNewEvent({
         ...newEvent,
         start: newStartDate.toDate(),
@@ -248,11 +247,14 @@ console.log(newEndDate, "END DATE")
     );
   };
 
+
+
   function CustomEvent({ event }) {
     return (
+      
       <div
         onMouseEnter={(e) => {
-          if (getParentElement(e)) {
+          if (getParentElement(e) && getParentElement(e).style.height.replace(/\d% ?/g, "") < 14 ) {
             getParentElement(e).classList.add("event-full-height");
           }
         }}
@@ -372,7 +374,6 @@ console.log(newEndDate, "END DATE")
   return eventData
  }
 
- console.log(editedEventDefault(), "editedEventDefault")
 
 
   return (
