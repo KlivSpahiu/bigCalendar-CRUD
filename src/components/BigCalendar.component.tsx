@@ -1,300 +1,549 @@
-import React, { useState } from 'react';
-import { Calendar, momentLocalizer } from 'react-big-calendar';
-import moment from 'moment';
-import 'react-big-calendar/lib/css/react-big-calendar.css';
+import React, { useEffect, useState } from "react";
+import { Calendar, momentLocalizer } from "react-big-calendar";
+import {
+  Form,
+  Input,
+  DatePicker,
+  Button,
+  Modal,
+  TimePicker,
+  Select,
+} from "antd";
+import dayjs from "dayjs";
+import Moment from "moment";
+import { useForm } from "antd/lib/form/Form";
+import "react-big-calendar/lib/css/react-big-calendar.css";
+import "../components/BigCalendar.css";
+import { title } from "process";
 
-const localizer = momentLocalizer(moment);
+const { TextArea } = Input;
+const { Option } = Select;
 
-const MyCalendar = () => {
-const [events, setEvents] = useState<any>([
-  {
-    id: 1,
-    title: 'Sample Event',
+const localizer = momentLocalizer(Moment);
+
+const MyCalendar: React.FC = () => {
+  const [events, setEvents] = useState<any>([]);
+    const [filteredEvents, setFilteredEvents] = useState([]);
+  
+  const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [editingEvent, setEditingEvent] = useState<any>(null);
+  const [selectedSubject, setSelectedSubject] = useState<any>("");
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [newEvent, setNewEvent] = useState<any>({
+    title: "",
+    description: "",
     start: new Date(),
     end: new Date(),
-    description: 'This is a sample event',
-  },
-]);
+    lenda: selectedSubject.lenda as string,
+    professor: "",
+    color: selectedSubject.color,
+  });
+  const klasaDropdownOptions = [
+    "KLASA A",
+    "KLASA B",
+    "KLASA C",
+    "KLASA D",
+    "KLASA E",
+  ];
+  const [selectedItem, setSelectedItem] = useState(klasaDropdownOptions[0]);
+  const [form] = useForm();
 
-const [newEvent, setNewEvent] = useState<any>({
-  title: '',
-  description: '',
-  start: new Date(),
-  end: new Date(),
-});
+  const workingHoursStart = new Date();
+  workingHoursStart.setHours(8, 0, 0, 0); // 9:00 AM
 
-const [editingEvent, setEditingEvent] = useState(null);
-console.log(editingEvent, "editingEvent")
+  const workingHoursEnd = new Date();
+  workingHoursEnd.setHours(21, 0, 0, 0);
 
-const handleEventClick = (event) => {
-  setEditingEvent({ ...event }); 
-};
+  const lendaDropdownOptions = [
+    {
+      lenda: "E drejta kushtetuese dhe të drejtat e njeriut",
+      color: "#C63D2F",
+      viti: 1,
+    },
+    {
+      lenda: "E drejta administrative dhe e drejta e punës ",
+      color: "#176B87",
+      viti: 2,
+    },
+    {
+      lenda: "E drejta penale dhe procedurë penale ",
+      color: "#4D2DB7",
+      viti: 1,
+    },
+    {
+      lenda: " E drejta civile dhe procedurë civile",
+      color: "#183D3D",
+      viti: 1,
+    },
+    {
+      lenda: "E drejta familjare  dhe e drejta tregtare",
+      color: "#FFC436",
+      viti: 2,
+    },
+    {
+      lenda: "E drejta e BE-së  dhe e drejta ndërkombëtare publike",
+      color: "#FF6969",
+      viti: 2,
+    },
+    {
+      lenda: "Gjuha shqipe",
+      color: "#5C5470",
+      viti: 1,
+    },
+    {
+      lenda: "Etika dhe sjellja qytetare",
+      color: "#974EC3",
+      viti: 2,
+    },
+  ];
 
-const handleInputChange = (e: any) => {
-  const { name, value } = e.target;
 
-  if (name === 'date') {
+  const handleCancel = () => {
+    setIsModalOpen(false);
+  };
 
-    const newStartDate = moment(value).set({
-      hour: moment(newEvent.start).hour(),
-      minute: moment(newEvent.start).minute(),
-    });
+  useEffect(() => {
+    setNewEvent({ ...newEvent, title: selectedItem });
+  }, [selectedItem]);
 
-    const newEndDate = moment(value).set({
-      hour: moment(newEvent.end).hour(),
-      minute: moment(newEvent.end).minute(),
-    });
+
+  const handleEventClick = (event) => {
+    setEditingEvent({ ...event });
+    setShowEditModal(true);
+  };
+
+  const handleInputChange = (name: string, value: string) => {
+    if (name === "date") {
+      const newStartDate = dayjs(value)
+        .hour(dayjs(newEvent.start).hour())
+        .minute(dayjs(newEvent.start).minute());
+        
+      const newEndDate = dayjs(value)
+        .hour(dayjs(newEvent.end).hour())
+        .minute(dayjs(newEvent.end).minute());
+      setNewEvent({
+        ...newEvent,
+        start: newStartDate.toDate(),
+        end: newEndDate.toDate(),
+      });
+    } else if (name === "start" || name === "end") {
+      setNewEvent({ ...newEvent, [name]: value });
+    } else {
+      setNewEvent({ ...newEvent, [name]: value });
+    }
+  };
+
+  
+
+  const handleEventCreation = () => {
+    // Create a new event
+    const newEventToAdd = {
+      title: newEvent.title,
+      description: newEvent.description,
+      start: newEvent.start,
+      end: newEvent.end,
+      lenda: selectedSubject.lenda,
+      professor: newEvent.name,
+      color: selectedSubject.color,
+    };
+
+
+    setEvents((prevEvents) => [...prevEvents, newEventToAdd]);
 
     setNewEvent({
-      ...newEvent,
-      start: newStartDate.toDate(),
-      end: newEndDate.toDate(),
+      title: selectedItem,
+      description: "",
+      start: new Date(),
+      end: new Date(),
+      lenda: selectedSubject.lenda,
+      professor: "",
+      color: "",
     });
-  } else {
+    const updatedFilteredEvents = [...filteredEvents];
+    if (selectedItem === newEventToAdd.title) {
+      updatedFilteredEvents.push(newEventToAdd);
+    }
+    setFilteredEvents(updatedFilteredEvents);
+    form.resetFields();
+    setIsModalOpen(false);
+  };
+
+  const handleEditInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditingEvent({
+      ...editingEvent,
+      [name]: value,
+    });
+  };
+
+  const handleEventUpdate = () => {
+    const eventIndex = events.findIndex(
+      (event) => event.id === editingEvent.id
+    );
+
+    if (eventIndex !== -1) {
+      const updatedEvents = [...events];
+      updatedEvents[eventIndex] = editingEvent;
+
+      setEvents(updatedEvents);
+      setEditingEvent(null); 
+    } else {
+      console.error("Event not found for editing.");
+    }
+  };
+
+  const deleteEvent = (eventId) => {
+    const updatedEvents = events.filter((event) => event.id !== eventId);
+    setEvents(updatedEvents);
+  };
+
+  const handleEventDelete = (event) => {
+    
+      deleteEvent(event.id);
   
-    setNewEvent({ ...newEvent, [name]: value });
-  }
-};
+  };
 
-  const [currentDate, setCurrentDate] = useState(new Date());
-
+  const getParentElement = (e) => {
+    const element = e.currentTarget;
+    const elementParent = element.parentElement;
+    const parent = elementParent.parentElement;
+    return parent;
+  };
 
   const customToolbar = () => {
     const goToNextWeek = () => {
-      const nextWeek = moment(currentDate).add(7, 'days').toDate();
+      const nextWeek = dayjs(currentDate).add(7, "day").toDate();
       setCurrentDate(nextWeek);
     };
 
     const goToPreviousWeek = () => {
-      const previousWeek = moment(currentDate).subtract(7, 'days').toDate();
+      const previousWeek = dayjs(currentDate).subtract(7, "day").toDate();
       setCurrentDate(previousWeek);
     };
 
-
     return (
       <div className="custom-toolbar">
-        <button onClick={goToPreviousWeek}>Previous Week</button>
-        <button onClick={goToNextWeek}>Next Week</button>
+        <div className="filters">
+          <button onClick={goToPreviousWeek} className="week-button">
+            Previous Week
+          </button>
+          <button onClick={goToNextWeek} className="week-button">
+            Next Week
+          </button>
+          <CustomDropdown
+            selectedItem={selectedItem}
+            onItemSelect={handleItemSelect}
+            options={klasaDropdownOptions}
+          />
+        </div>
+        <Button
+          type="primary"
+          style={{ backgroundColor: "#FF731D" }}
+          onClick={() => setIsModalOpen(true)}>
+          Shto lende
+        </Button>
       </div>
     );
   };
 
-const handleEventCreation = () => {
-  setEvents([
-    ...events,
-    {
-      ...newEvent,
-      start: moment(newEvent.start).toDate(),
-      end: moment(newEvent.end).toDate(),
-    },
-  ]);
-
-  setNewEvent({
-    title: '',
-    description: '',
-    start: new Date(),
-    end: new Date(),
-  });
-};
 
 
-// const handleEditInputChange = (e) => {
-//   const { name, value } = e.target;
-//   setEditingEvent({ ...editingEvent, [name]: new Date(value) });
-// };
-
-const handleEditInputChange = (e) => {
-  const { name, value } = e.target;
-
-  if (name === 'start' || name === 'end') {
-    // Parse the date and time input and set it as a Date object
-    setEditingEvent({ ...editingEvent, [name]: new Date(value) });
-  } else {
-    // Handle other input changes as before
-    setEditingEvent({ ...editingEvent, [name]: value });
-  }
-};
-
-// const handleEventUpdate = () => {
-
-//   const eventIndex = events.findIndex((event) => event.id === editingEvent.id);
-
-//   if (eventIndex !== -1) {
-    
-//     const updatedEvents = [...events];
-//     updatedEvents[eventIndex] = {
-//       ...updatedEvents[eventIndex],
-//       title: editingEvent.title,
-//       description: editingEvent.description,
-//       start: editingEvent.start,
-//       end: editingEvent.end,
-//     };
-
-//     setEvents(updatedEvents);
-//     setEditingEvent(null); 
-//   } else {
-  
-//     console.error('Event not found for editing.');
-//   }
-// };
-
-const handleEventUpdate = () => {
-  // Find the index of the edited event
-  const eventIndex = events.findIndex((event) => event.id === editingEvent.id);
-
-  if (eventIndex !== -1) {
-    // Update the event in the events array
-    const updatedEvents = [...events];
-    updatedEvents[eventIndex] = editingEvent;
-
-    setEvents(updatedEvents);
-    setEditingEvent(null); // Clear the editing state
-  } else {
-    // Handle the case where the event with the given ID is not found
-    console.error('Event not found for editing.');
-  }
-};
-
-const deleteEvent = (eventId) => {
-  const updatedEvents = events.filter((event) => event.id !== eventId);
-  setEvents(updatedEvents);
-};
-
-const handleEventDelete = (event) => {
-  const confirmDelete = window.confirm(
-    `Are you sure you want to delete the event "${event.title}"?`
-  );
-
-  if (confirmDelete) {
-    deleteEvent(event.id);
-  }
-};
-
-
-function CustomEvent({ event }) {
-  return (
-    <div>
-      <strong>{event.title}</strong>
-      <p>{event.description}</p>
-    </div>
-  );
-}
-
-
-
-
-
-
-  return (
-    <div>
-      <Calendar
-        localizer={localizer}
-        events={events}
-        startAccessor="start"
-        endAccessor="end"
-        date={currentDate}
-        components={{
-          toolbar: customToolbar,
-           event: CustomEvent,
+  function CustomEvent({ event }) {
+    return (
+      
+      <div
+        onMouseEnter={(e) => {
+          if (getParentElement(e) && getParentElement(e).style.height.replace(/\d% ?/g, "") < 14 ) {
+            getParentElement(e).classList.add("event-full-height");
+          }
         }}
-        defaultView="week"
-        onSelectSlot={(slotInfo: any) =>
-        setNewEvent({
-          start: slotInfo.start,
-          end: slotInfo.end,
-        })
-        
-      }onSelectEvent={handleEventClick}
-      />
+        onMouseLeave={(e) => {
+          if (getParentElement(e)) {
+            getParentElement(e).classList.remove("event-full-height");
+          }
+        }}>
+        <strong>{event.title}</strong>
+        <p>{`Pedagogu i lendes: ${event.professor}`}</p>
+        <p>{`Lenda: ${event.lenda}`}</p>
+      </div>
+    );
+  }
 
-          <div>
-      <h2>Shto event</h2>
-      <form>
-        <label>Title:</label>
-        <input
-          type="text"
-          name="title"
-          value={newEvent.title}
-          onChange={handleInputChange}
+  const handleSelectChange = (value) => {
+    const selectedOption = lendaDropdownOptions.find(
+      (option) => option.lenda === value
+    );
+    setSelectedSubject(selectedOption || null);
+  };
+
+
+
+  const handleItemSelect = (item) => {
+    form.resetFields();
+    setSelectedItem(item);
+    const filtered = events.filter((event) => event.title === item);
+    setFilteredEvents(filtered);
+  };
+
+  const handleStartTimeChange = (time) => {
+    handleInputChange("start", time);
+  };
+
+  const handleEndTimeChange = (time) => {
+    handleInputChange("end", time);
+  };
+
+  const parseTime = (timeString) => {
+    
+      if (timeString) {
+        const parsedTime = dayjs(timeString, "HH:mm");
+        return parsedTime;
+        
+      }
+      return null;
+    
+  };
+
+  
+  function CustomDropdown({ selectedItem, onItemSelect, options }) {
+    return (
+      <Select value={selectedItem} onChange={onItemSelect}>
+        {options.map((option) => (
+          <Option key={option} value={option}>
+            {option}
+          </Option>
+        ))}
+      </Select>
+    );
+  }
+
+    function LendaDropDown() {
+    return (
+      <Form.Item
+        name="selectedOption"
+        label="Select an option"
+        rules={[{ required: true, message: "Please select an option" }]}>
+        <Select
+          placeholder="Select an option"
+          value={selectedSubject ? selectedSubject.lenda : undefined}
+          onChange={(value) => handleSelectChange(value)}>
+          {lendaDropdownOptions.map((option: any, index) => (
+            <Option key={index} value={option.lenda}>
+              {option.lenda}
+            </Option>
+          ))}
+        </Select>
+      </Form.Item>
+    );
+  }
+
+  const eventCardStyle = (event) => {
+    const backgroundColor = event.color;
+
+    const style = {
+      backgroundColor,
+      borderRadius: "0",
+      opacity: 0.8,
+      color: "white",
+      display: "block",
+      border: `1px solid white`
+    };
+
+    return {
+      style,
+    };
+  };
+
+  const calendarStyle = {
+    height: "1200px", 
+  };
+
+ 
+
+ const editedEventDefault = () => {
+  const eventData = []
+
+  for(const key in editingEvent) {
+    eventData.push({
+      name: key,
+      value: editingEvent[key]
+    })
+  }
+
+  return eventData
+ }
+
+
+
+  return (
+    <div>
+      <div style={calendarStyle}>
+        <Calendar
+          localizer={localizer}
+          events={filteredEvents}
+          startAccessor="start"
+          endAccessor="end"
+          date={currentDate}
+          components={{
+            toolbar: customToolbar,
+            event: CustomEvent,
+          }}
+          defaultView="week"
+          eventPropGetter={eventCardStyle}
+          onSelectEvent={handleEventClick}
+          min={workingHoursStart}
+          max={workingHoursEnd}
         />
-        <br />
-        <label>Description:</label>
-        <textarea
-          name="description"
-          value={newEvent.description}
-          onChange={handleInputChange}
-        />
-        <br />
-        <label>Start Time:</label>
-        <input
-          type="datetime-local"
-          name="start"
-          value={moment(newEvent.start).format('YYYY-MM-DDTHH:mm')}
-          onChange={handleInputChange}
-        />
-        <br />
-        <label>End Time:</label>
-        <input
-          type="datetime-local"
-          name="end"
-          value={moment(newEvent.end).format('YYYY-MM-DDTHH:mm')}
-          onChange={handleInputChange}
-        />
-        <br />
-        <label>Date:</label>
-            <input
-             type="date"
+      </div>
+
+      <Modal
+        title="Modifiko lenden"
+        open={showEditModal}
+        onCancel={() => setShowEditModal(false)}>
+        {editingEvent && (
+          <Form form={form} initialValues={editedEventDefault()}>
+          <Form.Item
+            label="Title"
+            name="title"
+            rules={[{ required: true, message: "Please enter the title" }]}>
+            <Input
+              type="text"
+              name="title"
+              onChange={handleEditInputChange}
+              defaultValue={editingEvent.title}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Name"
+            name="professor"
+            rules={[{ required: true, message: "Please enter the name" }]}>
+            <Input
+              type="text"
+              name="name"
+              value={newEvent.professor}
+              onChange={handleEditInputChange}
+            />
+          </Form.Item>
+            <Form.Item label="Description">
+              <TextArea
+                name="description"
+                value={editingEvent.description}
+                onChange={handleEditInputChange}
+              />
+            </Form.Item>
+            <Form.Item label="Start Time">
+              <TimePicker
+                format="HH:mm"
+                name="start"
+                value={dayjs(editingEvent.start)}
+                onChange={(time, timeString) =>
+                  handleEditInputChange({
+                    target: {
+                      name: "start",
+                      value: time,
+                    },
+                  })
+                }
+              />
+            </Form.Item>
+            <Form.Item label="End Time">
+              <TimePicker
+                format="HH:mm"
+                name="end"
+                value={dayjs(editingEvent.end)}
+                onChange={(time, timeString) =>
+                  handleEditInputChange({
+                    target: {
+                      name: "end",
+                      value: time,
+                    },
+                  })
+                }
+              />
+            </Form.Item>
+            <Form.Item>
+              <Button type="primary" onClick={handleEventUpdate}>
+                Update Event
+              </Button>
+              <Button type="primary" onClick={handleEventDelete}>
+                Delete Event
+              </Button>
+            </Form.Item>
+          </Form>
+        )}
+      </Modal>
+
+      <Modal
+        title="Shto lende ne orar"
+        open={isModalOpen} 
+        onOk={handleEventCreation}
+        onCancel={handleCancel}>
+        <Form form={form}>
+          <Form.Item
+            label="Klasa"
+            name="title"
+            rules={[{ required: true, message: "Please enter the title" }]}>
+            <Input
+              type="text"
+              name="title"
+              value={newEvent.title}
+              onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+              defaultValue={newEvent.title}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Pedagogu"
+            name="name"
+            rules={[{ required: true, message: "Please enter the name" }]}>
+            <Input
+              type="text"
+              name="name"
+              value={newEvent.professor}
+              onChange={(e) => handleInputChange(e.target.name, e.target.value)}
+            />
+          </Form.Item>
+          <Form.Item
+            label="Start Time"
+            name="start"
+            rules={[
+              { required: true, message: "Please select the start time" },
+            ]}>
+            <TimePicker
+              format="HH:mm"
+              name="start"
+              value={dayjs(newEvent.start)}
+              onChange={handleStartTimeChange}
+            />
+          </Form.Item>
+
+          <Form.Item
+            label="End Time"
+            name="end"
+            rules={[{ required: true, message: "Please select the end time" }]}>
+            <TimePicker
+              format="HH:mm"
+              name="end"
+              value={dayjs(newEvent.end)}
+              onChange={handleEndTimeChange}
+            />
+          </Form.Item>
+          <LendaDropDown />
+          <Form.Item
+            label="Data"
+            name="date"
+            rules={[{ required: true, message: "Please select a date" }]}>
+            <DatePicker
+              format="YYYY-MM-DD"
               name="date"
-              value={moment(newEvent.start).format('YYYY-MM-DD')}
-              onChange={handleInputChange}
-          />
-        <button type="button" onClick={handleEventCreation}>
-          Create Event
-        </button>
-      </form>
-    </div>
-    {editingEvent && <div>
-    <h2>Edit Event</h2>
-    <form>
-      <label>Title:</label>
-      <input
-        type="text"
-        name="title"
-        value={editingEvent.title || ''}
-        onChange={handleEditInputChange}
-      />
-      <br />
-      <label>Description:</label>
-      <textarea
-        name="description"
-        value={editingEvent.description}
-        onChange={handleEditInputChange}
-      />
-      <br />
-      <label>Start Time:</label>
-      <input
-        type="datetime-local"
-        name="start"
-        value={moment(editingEvent.start).format('YYYY-MM-DDTHH:mm')}
-        onChange={handleEditInputChange}
-      />
-      <br />
-      <label>End Time:</label>
-      <input
-        type="datetime-local"
-        name="end"
-        value={moment(editingEvent.end).format('YYYY-MM-DDTHH:mm')}
-        onChange={handleEditInputChange}
-      />
-      <br />
-      <button type="button" onClick={handleEventUpdate}>
-        Update Event
-      </button>
-      <button type="button" onClick={handleEventDelete}>
-        Delete event
-      </button>
-    </form>
-  </div>}
+              value={dayjs(newEvent.start)}
+              onChange={(date, dateString) =>
+                handleInputChange("date", dateString)
+              }
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </div>
   );
 };

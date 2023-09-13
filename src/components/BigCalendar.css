@@ -1,0 +1,38 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600&family=Montserrat:wght@600&family=Outfit:wght@400;700&family=Poppins:ital,wght@0,700;1,300;1,700&family=Roboto&display=swap');
+
+
+
+
+.custom-toolbar{
+    margin: 1rem 1rem;
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Inter', sans-serif;
+    
+}
+
+.rbc-events-container{
+    margin-right: 0 !important;
+}
+
+.week-button{
+    background-color: #4F46E5;
+    padding: 0.5rem 1.5rem;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Inter', sans-serif;
+}
+
+.filters{
+    display: flex;
+    gap: 1rem;
+    font-family: 'Inter', sans-serif;
+}
+
+.event-full-height{
+    height: 15% !important;
+    transition: ease-in-out .2s;
+    opacity: 1 !important;
+    z-index: 5;
+}
