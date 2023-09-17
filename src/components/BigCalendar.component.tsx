@@ -23,8 +23,8 @@ const localizer = momentLocalizer(Moment);
 
 const MyCalendar: React.FC = () => {
   const [events, setEvents] = useState<any>([]);
-    const [filteredEvents, setFilteredEvents] = useState([]);
-  
+  const [filteredEvents, setFilteredEvents] = useState([]);
+
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
   const [editingEvent, setEditingEvent] = useState<any>(null);
   const [selectedSubject, setSelectedSubject] = useState<any>("");
@@ -38,6 +38,7 @@ const MyCalendar: React.FC = () => {
     lenda: selectedSubject.lenda as string,
     professor: "",
     color: selectedSubject.color,
+    textColor: selectedSubject.color,
   });
   const klasaDropdownOptions = [
     "KLASA A",
@@ -59,45 +60,52 @@ const MyCalendar: React.FC = () => {
     {
       lenda: "E drejta kushtetuese dhe të drejtat e njeriut",
       color: "#C63D2F",
+      textColor: "#3D0C11",
       viti: 1,
     },
     {
       lenda: "E drejta administrative dhe e drejta e punës ",
       color: "#176B87",
+      textColor: "#26577C",
       viti: 2,
     },
     {
       lenda: "E drejta penale dhe procedurë penale ",
       color: "#4D2DB7",
+      textColor: "#27005D",
       viti: 1,
     },
     {
       lenda: " E drejta civile dhe procedurë civile",
       color: "#183D3D",
+      textColor: "#053B50",
       viti: 1,
     },
     {
       lenda: "E drejta familjare  dhe e drejta tregtare",
       color: "#FFC436",
+      textColor: "#E55604",
       viti: 2,
     },
     {
       lenda: "E drejta e BE-së  dhe e drejta ndërkombëtare publike",
       color: "#FF6969",
+      textColor: "#952323",
       viti: 2,
     },
     {
       lenda: "Gjuha shqipe",
       color: "#5C5470",
+      textColor: "#27005D",
       viti: 1,
     },
     {
       lenda: "Etika dhe sjellja qytetare",
       color: "#974EC3",
+      textColor: "#451952",
       viti: 2,
     },
   ];
-
 
   const handleCancel = () => {
     setIsModalOpen(false);
@@ -106,7 +114,6 @@ const MyCalendar: React.FC = () => {
   useEffect(() => {
     setNewEvent({ ...newEvent, title: selectedItem });
   }, [selectedItem]);
-
 
   const handleEventClick = (event) => {
     setEditingEvent({ ...event });
@@ -118,7 +125,7 @@ const MyCalendar: React.FC = () => {
       const newStartDate = dayjs(value)
         .hour(dayjs(newEvent.start).hour())
         .minute(dayjs(newEvent.start).minute());
-        
+
       const newEndDate = dayjs(value)
         .hour(dayjs(newEvent.end).hour())
         .minute(dayjs(newEvent.end).minute());
@@ -134,8 +141,6 @@ const MyCalendar: React.FC = () => {
     }
   };
 
-  
-
   const handleEventCreation = () => {
     // Create a new event
     const newEventToAdd = {
@@ -146,8 +151,8 @@ const MyCalendar: React.FC = () => {
       lenda: selectedSubject.lenda,
       professor: newEvent.name,
       color: selectedSubject.color,
+      textColor: selectedSubject.textColor,
     };
-
 
     setEvents((prevEvents) => [...prevEvents, newEventToAdd]);
 
@@ -159,6 +164,7 @@ const MyCalendar: React.FC = () => {
       lenda: selectedSubject.lenda,
       professor: "",
       color: "",
+      textColor: "",
     });
     const updatedFilteredEvents = [...filteredEvents];
     if (selectedItem === newEventToAdd.title) {
@@ -187,7 +193,7 @@ const MyCalendar: React.FC = () => {
       updatedEvents[eventIndex] = editingEvent;
 
       setEvents(updatedEvents);
-      setEditingEvent(null); 
+      setEditingEvent(null);
     } else {
       console.error("Event not found for editing.");
     }
@@ -199,9 +205,7 @@ const MyCalendar: React.FC = () => {
   };
 
   const handleEventDelete = (event) => {
-    
-      deleteEvent(event.id);
-  
+    deleteEvent(event.id);
   };
 
   const getParentElement = (e) => {
@@ -247,14 +251,14 @@ const MyCalendar: React.FC = () => {
     );
   };
 
-
-
   function CustomEvent({ event }) {
     return (
-      
       <div
         onMouseEnter={(e) => {
-          if (getParentElement(e) && getParentElement(e).style.height.replace(/\d% ?/g, "") < 14 ) {
+          if (
+            getParentElement(e) &&
+            getParentElement(e).style.height.replace(/\d% ?/g, "") < 14
+          ) {
             getParentElement(e).classList.add("event-full-height");
           }
         }}
@@ -264,8 +268,13 @@ const MyCalendar: React.FC = () => {
           }
         }}>
         <strong>{event.title}</strong>
-        <p>{`Pedagogu i lendes: ${event.professor}`}</p>
-        <p>{`Lenda: ${event.lenda}`}</p>
+        <p>
+          <strong>Pedagogu i lendes:</strong> {event.professor}
+        </p>
+        <p>
+          <strong>Lenda:</strong>
+          {event.lenda}
+        </p>
       </div>
     );
   }
@@ -276,8 +285,6 @@ const MyCalendar: React.FC = () => {
     );
     setSelectedSubject(selectedOption || null);
   };
-
-
 
   const handleItemSelect = (item) => {
     form.resetFields();
@@ -295,17 +302,13 @@ const MyCalendar: React.FC = () => {
   };
 
   const parseTime = (timeString) => {
-    
-      if (timeString) {
-        const parsedTime = dayjs(timeString, "HH:mm");
-        return parsedTime;
-        
-      }
-      return null;
-    
+    if (timeString) {
+      const parsedTime = dayjs(timeString, "HH:mm");
+      return parsedTime;
+    }
+    return null;
   };
 
-  
   function CustomDropdown({ selectedItem, onItemSelect, options }) {
     return (
       <Select value={selectedItem} onChange={onItemSelect}>
@@ -318,7 +321,7 @@ const MyCalendar: React.FC = () => {
     );
   }
 
-    function LendaDropDown() {
+  function LendaDropDown() {
     return (
       <Form.Item
         name="selectedOption"
@@ -339,15 +342,17 @@ const MyCalendar: React.FC = () => {
   }
 
   const eventCardStyle = (event) => {
-    const backgroundColor = event.color;
+    const backgroundColor = event.color + "50";
+    console.log(event, "event");
 
     const style = {
       backgroundColor,
       borderRadius: "0",
-      opacity: 0.8,
-      color: "white",
+      color: event.textColor,
       display: "block",
-      border: `1px solid white`
+      border: "none",
+      borderLeft: `10px solid ${event.color}`,
+      fontSize: "15px",
     };
 
     return {
@@ -356,25 +361,21 @@ const MyCalendar: React.FC = () => {
   };
 
   const calendarStyle = {
-    height: "1200px", 
+    height: "1200px",
   };
 
- 
+  const editedEventDefault = () => {
+    const eventData = [];
 
- const editedEventDefault = () => {
-  const eventData = []
+    for (const key in editingEvent) {
+      eventData.push({
+        name: key,
+        value: editingEvent[key],
+      });
+    }
 
-  for(const key in editingEvent) {
-    eventData.push({
-      name: key,
-      value: editingEvent[key]
-    })
-  }
-
-  return eventData
- }
-
-
+    return eventData;
+  };
 
   return (
     <div>
@@ -403,28 +404,28 @@ const MyCalendar: React.FC = () => {
         onCancel={() => setShowEditModal(false)}>
         {editingEvent && (
           <Form form={form} initialValues={editedEventDefault()}>
-          <Form.Item
-            label="Title"
-            name="title"
-            rules={[{ required: true, message: "Please enter the title" }]}>
-            <Input
-              type="text"
+            <Form.Item
+              label="Title"
               name="title"
-              onChange={handleEditInputChange}
-              defaultValue={editingEvent.title}
-            />
-          </Form.Item>
-          <Form.Item
-            label="Name"
-            name="professor"
-            rules={[{ required: true, message: "Please enter the name" }]}>
-            <Input
-              type="text"
-              name="name"
-              value={newEvent.professor}
-              onChange={handleEditInputChange}
-            />
-          </Form.Item>
+              rules={[{ required: true, message: "Please enter the title" }]}>
+              <Input
+                type="text"
+                name="title"
+                onChange={handleEditInputChange}
+                defaultValue={editingEvent.title}
+              />
+            </Form.Item>
+            <Form.Item
+              label="Name"
+              name="professor"
+              rules={[{ required: true, message: "Please enter the name" }]}>
+              <Input
+                type="text"
+                name="name"
+                value={newEvent.professor}
+                onChange={handleEditInputChange}
+              />
+            </Form.Item>
             <Form.Item label="Description">
               <TextArea
                 name="description"
@@ -476,7 +477,7 @@ const MyCalendar: React.FC = () => {
 
       <Modal
         title="Shto lende ne orar"
-        open={isModalOpen} 
+        open={isModalOpen}
         onOk={handleEventCreation}
         onCancel={handleCancel}>
         <Form form={form}>
